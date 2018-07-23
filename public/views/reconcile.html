@@ -1,0 +1,155 @@
+<div class="create-survey-wrapper" >
+    <header class="dashbboard-header">
+        <div class="col-xs-12 col-sm-6 col-md-6 dash-logo-section">
+            <img class="img-responsive" src="img/logo-without-name.png" alt="Logo" title="" ui-sref="home" />
+            <p><a href="tel:+877865-PURE">(877) 865-PURE</a></p>
+        </div>
+        <div class="col-xs-12 col-sm-4 col-md-4 dashbrd-options pull-right text-right">
+            <a ng-if="showCreate" ui-sref="dynstate({id: 'CreateSurveys' })" ng-click="clearDataFunc()">+ New     Survey</a>
+            <div class="dropdown user-options">
+                <button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <img class="img-responsive" src="img/dashbrd-header-menu.png" alt="menu" title="" />
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="user-actions">
+                    <li class="username">Hello {{userEmail}}</li>
+                    <!-- <li class="access-levels">
+                        <div class="col-xs-6">
+                            <p>Platform capabilities:</p>
+                            <span>Buyer = {{buyer}}</span>
+                            <span>Supplier = {{supplier}}</span>
+                            <span>Operator = {{operator}}</span>
+                        </div>
+                        <div class="col-xs-6">
+                            <p>Access Levels:</p>
+                            <span>Buyerside = {{buyerrole}}</span>
+                            <span>Supplierside = {{supplierrole}}</span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </li> -->
+                    <li ng-repeat="link in dsboardLink"> <button type="button" class="btn btn-link" ui-sref="dynstate({id: {{'link.featureKey'}} })" >{{link.featureLabel}}</button></li>
+                    <li><a ng-click="resetPassword($event)">Reset Password</a></li>
+                    <li><a ng-click="logout($event)">Logout</a></li>
+                 </ul>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </header>
+    <section class="pad">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 text-center" style="margin-top: 80px;font-size: 18px;">
+                    <label>Upload File</label>
+
+                    <input type="file" class="hide" id="fileModel" file-upload data-file="param.file" accept=".csv, .xls, .xlsx"/>
+
+
+                    <input id="filePath" type="text" name="" ng-readonly="true" ng-click="inputBocClick()" placeholder=".csv, .xls, .xlsx" class="input-md" ng-model="param.file"> <br/> <br/>
+
+                    
+                    <!-- .xlsx file format-->    
+                    <a target="_blank" href="/files/reconciliation.xlsx"><i> Download Sample </i> </a>
+
+                    <br/><br/>
+                    <button class="btn btn-info reconcile-innerbutton" ng-click="uploadBuyerReconciliationFile()" value="Upload" >Upload</button> <br/><br/>
+                    <button type="button" class="btn btn-primary submit-btn" style="margin-left: 20px;" ui-sref="home">Back to Dashboard</button>
+                    <!-- <button class="btn btn-info reconcile-viewUpload" ng-click="viewPreviousUpload()" value="Upload" >View Previous Uploads</button> -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="overlay-div" ng-show="loader.show">
+        <div id="loader-wrapper">
+            <div id="loader"><span></span></div>
+        </div>
+    </div>
+    <!-- Reconciliation confirm model -->
+    <div id="reconcileModal" class="modal" tabindex="-1" role="dialog">
+        <div class="vertical-alignment-helper">
+            <div class="modal-dialog vertical-align-center">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title text-center">Reconciliation</h4>
+                    </div>
+                    <div class="modal-body">
+                        <br/>
+                        <p class="text-center">Based on your upload, of the</p>
+                        <p class="text-center">{{totalFileTrans}} transactions are eligible for reconciliation,</p>
+                        <p class="text-center">you have reconcilied:</p> <br/>
+                        <p class="text-center">{{transStatusComplt}} completes</p>
+                        <p class="text-center">additionally , there were</p>
+                        <p class="text-center">{{rejectTrans}} rejected completes</p>
+                        <p class="text-center">{{changeToComplt}} transactions that were changed to complete.</p> <br/>
+                        <p class="text-center">Once you confirm , you may no longer</p>
+                        <p class="text-center">reconcile these transactions</p>
+                        <div class="text-center">
+                            <a class="status-change-yes" data-dismiss="modal" ng-click="confirmReconciliation()">Confirm</a>
+                            <a class="status-change-no" data-dismiss="modal" ng-click="declineReconciliation()">No thanks, close</a>
+                        </div>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Reconciliation warning model -->
+    <div id="reconcileWarnModal" class="modal" tabindex="-1" role="dialog">
+        <div class="vertical-alignment-helper">
+            <div class="modal-dialog vertical-align-center">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title text-center"> Reconciliation</h4>
+                    </div>
+                    <div class="modal-body">
+                        <h2><span class="glyphicon glyphicon-warning-sign" style="color: red;"></span>&nbsp;&nbsp;Reconciliation Failed</h2>
+                        <p class="text-center">Your uploads contains transactions that are</p>
+                        <p class="text-center">ineligible for reconciliation.</p>
+                        <br/>
+                        <p class="text-center">You may only reconcile completes in a closed survey, or completes</p>
+                        <p class="text-center">from a prior month calendar</p>
+                        <div class="text-center">
+                            <a class="status-change-yes" data-dismiss="modal">Got it!</a>
+                        </div>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Reconciliation Approve model -->
+    <div id="reconcileApprvModal" class="modal" tabindex="-1" role="dialog">
+        <div class="vertical-alignment-helper">
+            <div class="modal-dialog vertical-align-center">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title text-center">Reconciliation Approve By Buyer</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-center">Do you want to reconcile following transactions:</p> <br/>
+                        <p class="text-center">{{completeTrans}} completes</p>
+                        <p class="text-center">{{rejectedTrans}} rejected completes</p>
+                        <p class="text-center">{{statusChangeTrans}} transactions that were changed to complete.</p> <br/>
+                        <div class="text-center">
+                            <a class="status-change-yes" data-dismiss="modal" ng-click="confirmReconciliationMonth()">Confirm</a>
+                            <a class="status-change-no" data-dismiss="modal">No thanks, close</a>
+                        </div>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    #filePath{
+        width: 200px;
+        /* border-radius: 3px; */
+        box-shadow: none;
+        border: 1px solid #9d9d9d;
+        height: 30px;
+        padding: 0 8px;
+    }
+    label{
+        display:block;
+    }
+</style>

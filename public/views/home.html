@@ -1,0 +1,1888 @@
+<div ng-controller="dashCtrl" class="dashbdr_wrapper">
+	<header class="dashbboard-header">
+		<div class="col-xs-12 col-sm-6 col-md-6 dash-logo-section">
+			<img class="img-responsive" src="img/logo-without-name.png" alt="Logo" title="" ui-sref="home" />
+			<p><a href="tel:+877865-PURE">(877) 865-PURE</a></p>
+		</div>
+		<div class="col-xs-12 col-sm-4 col-md-4 dashbrd-options pull-right text-right">
+			<a ng-if="showCreate" ui-sref="dynstate({id: 'CreateSurveys' })" ng-click="clearDataFunc()">+ New Survey</a>
+			<div class="dropdown decipherBut" ng-if="isDecipher">
+				<button class="btn btn-default dropdown-toggle survey-style" type="button" id="decipherList" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+					<i class="fa fa-angle-down"></i>
+				</button>
+				<ul class="dropdown-menu" aria-labelledby="decipherList">
+					<li class="username" ui-sref="decipher">Import From Decipher</li>
+				</ul>
+			</div>
+			<div class="dropdown user-options">
+				<button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+					<img class="img-responsive" src="img/dashbrd-header-menu.png" alt="menu" title="" />
+				</button>
+				<ul class="dropdown-menu" aria-labelledby="user-actions">
+					<li class="username">Hello {{userEmail}}</li>
+					<li ng-repeat="link in dsboardLink"> <button type="button" class="btn btn-link" ui-sref="dynstate({id: {{'link.featureKey'}} })" >{{link.featureLabel}}</button></li>
+					<li><a ng-click="resetPassword($event)">Reset Password</a></li>
+					<li><a ng-click="logout($event)">Logout</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="clearfix"></div>
+	</header>
+	<section class="pad"  infinite-scroll="loadMoreRecords()" infinite-scroll-disabled="infinteScroll.disabled" infinite-scroll-immediate-check="true">
+		<div class="container" ng-show="showManageSurvey">
+			<div class="row">
+				<div class="col-md-12 dashbrd-survey-table">
+					<div ng-if="!showSurveyDetails">
+						<!-- <h3 class="dashbdr-title">Surveys</h3> -->
+						<!-- Nav tabs -->
+						<ul class="nav nav-tabs custom-tabs" role="tablist">
+							<li role="presentation" ng-class="{ active: active.tab == 'all' }"><a href="" aria-controls="all" role="tab" ng-class="{inactive : tabs.makeDisable}" data-toggle="tab" ng-click="closeSurveyDetails(); setTab('all')">All</a></li>
+							<li role="presentation" ng-class="{ active: active.tab == 'live' }"><a href="" aria-controls="live" role="tab" ng-class="{inactive : tabs.makeDisable}" data-toggle="tab" ng-click="closeSurveyDetails(); setTab('live')">Live <span>({{surveysCount.live | number}})</span></a></li>
+							<li role="presentation" ng-class="{ active: active.tab == 'paused' }"><a href="" aria-controls="paused" role="tab" ng-class="{inactive : tabs.makeDisable}" data-toggle="tab" ng-click="closeSurveyDetails(); setTab('paused')">Paused <span>({{surveysCount.pause | number}})</span></a></li>
+							<li role="presentation" ng-if="showDraftSurvey" ng-class="{ active: active.tab == 'drafts' }"><a href="" aria-controls="drafts" role="tab" ng-class="{inactive : tabs.makeDisable}" data-toggle="tab" ng-click="closeSurveyDetails(); setTab('drafts')" ng-show="showDraftSurvey">Drafts</a></li>
+							<li role="presentation" ng-class="{ active: active.tab == 'closed' }"><a href="" aria-controls="closed" role="tab" data-toggle="tab" ng-class="{inactive : tabs.makeDisable}" ng-click="closeSurveyDetails(); setTab('closed')" >Closed</a></li>
+						</ul>
+
+						<!-- Tab panes -->
+						<div class="tab-content custom-tab-content">
+							<div ng-show="isSet('all')" id="all">
+								<div class="survey-search">
+									<label>
+										Search
+										<input type="text" placeholder="Search Survey" ng-model="searchSurvey.query" ng-model-options='{ debounce: 1000 }' ng-change="searchSurveys('all')" />
+									</label>
+								</div>
+								<div class="">
+									<table class="table dashbrd-table" datatable="ng" dt-options="dtOptions"  dt-columns="dtColumns" dt-column-defs="dtColumnDefs">
+										<thead class="not-fixed">
+										<tr>
+											<th>Status <span></span></th>
+											<th>Survey# <span></span></th>
+											<th>Survey Title <span></span></th>
+											<th ng-if="supplier == 'none' && buyer == 'none'">Buyer Account <span></span></th>
+											<th>Fielded vs Goal<span></span></th>
+											<th ng-if="buyer != 'none' || operator != 'none'">In Progress<span></span></th>
+											<th>Avg. CPI<span></span></th>
+											<th ng-if="operator != 'none'">EPC<span></span></th>
+											<th>Current IR<span></span></th>
+											<th>Country<span></span></th>
+											<th>Manage</th>
+										</tr>
+										</thead>
+										<tbody>
+										<tr ng-repeat="survey in dsbrdSurvey track by $index">
+											<td>
+												<div class="dropdown survey-status">
+													<button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" ng-disabled="hideStatusEdit || survey.status == 'Closed'
+													|| survey.status == 'Draft'">
+														{{survey.status}} <i class="fa fa-angle-down" aria-hidden="true"></i><div class="clearfix" ></div>
+													</button>
+													<ul class="dropdown-menu" aria-labelledby="user-actions" data-animations="fadeInDown">
+														<li ng-if="survey.status != 'Live'"><a data-toggle="modal" data-target="#status-change-modal" ng-click="openStatusModal(survey.id, survey.encriptionId, 'Live', $index, survey.status)">Live</a></li>
+														<li ng-if="survey.status == 'Live'"><a data-toggle="modal" data-target="#status-change-modal"  ng-click="openStatusModal(survey.id, survey.encriptionId, 'Pause', $index, survey.status)">Paused</a></li>
+														<li ng-if="survey.status == 'Live' || survey.status == 'Pause'"><a data-toggle="modal" data-target="#status-change-modal" ng-click="openStatusModal(survey.id, survey.encriptionId, 'Closed', $index, survey.status)">Closed</a></li>
+													</ul>
+												</div>
+											</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.id}}</td>
+											<td class="survey-title" ng-click="openSurveyDetails(survey, $index)" title="{{survey.surveyTitle}}">{{survey.surveyTitle}}</td>
+											<td class="buyer-account" ng-if="operatorFlg" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;"> <!-- PD-628 -->{{survey.buyer_accunt}}</td>
+											<td ng-if="supplier != 'none'" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.Fielded | number:0}} | {{userCompany == survey.supplier[0].id ? (survey.supplier[0].quantity | number:0):0}}</td>
+											<td ng-if="buyer != 'none' || operator != 'none'" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.Fielded | number:0}} | {{survey.number | number:0}}</td>
+											<td ng-if="buyer != 'none' || operator != 'none'" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.actualBuyerInProgress < 0 ? 0:survey.actualBuyerInProgress}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.status == 'Draft' ? 'NA' : survey.averageCpi | currency:value = survey.currency_symbol}}</td>
+											<td ng-if="operator != 'none' && survey.epc != undefined" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.epc | currency:value = survey.currency_symbol}}</td>
+											<td ng-if="operator != 'none' && survey.epc == undefined" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{'NA'}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.status == 'Draft' ? 'NA' : (survey.incidence_current | number:0)}} <span ng-if="survey.status != 'Draft'">%</span></td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.countryCode}}</td>
+											<td class="survey-edit" ng-show="hideManageSurvey || filterCompanyDetail || showManageSurvey" ng-if="survey.status != 'Draft' && buyer == 'none'" style="cursor:pointer;"><a ng-click="openSurveyDetails(survey, $index)"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></a></td>
+
+											<td class="survey-edit" ng-show="hideManageSurvey || filterCompanyDetail" ng-if="survey.status == 'Draft'"><a ng-click="openSurveyDetails(survey, $index);clearDataFunc()"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></a><a class="delete-survey" data-toggle="modal" data-target="#survey-delete-modal" ng-click="deleteModal(survey.id, survey.encriptionId)"><span class="glyphicon glyphicon-trash"></span></a></td>
+
+											<!-- PD-709 -->
+											<td class="survey-edit manage-col" ng-show="hideManageSurvey || filterCompanyDetail || showManageSurvey" ng-if="survey.status != 'Draft' && buyer != 'none'" style="cursor:pointer;">
+												<div class="dropdown">
+													<button class="btn btn-default dropdown-toggle survey-style" type="button" id="manage-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+														<i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+														<div class="clearfix" ></div>
+													</button>
+													<ul class="dropdown-menu" aria-labelledby="manage-options" data-animations="fadeInDown">
+														<li><a ng-click="openSurveyDetails(survey, $index)">Manage</a></li>
+														<li><a ng-click="cloneLiveSurvey(survey, $index)">Clone</a></li>
+													</ul>
+												</div>
+											</td>
+										</tr>
+										</tbody>
+									</table>
+									<div class="table-next-loader" ng-if="tableData.loading"></div>
+									<div class="table-entries-info" ng-cloak>Showing 1 to {{dsbrdSurvey.length}} of {{surveysCount.all}} entries</div>
+								</div>
+
+							</div>
+							<div id="live" ng-show="isSet('live')">
+								<div class="survey-search">
+									<label>
+										Search
+										<input type="text" placeholder="Search Survey" ng-model="searchSurvey.query" ng-model-options='{ debounce: 1000 }' ng-change="searchSurveys('22')" />
+									</label>
+								</div>
+								<div class="" ng-if="!showSurveyDetails">
+									<table class="table dashbrd-table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns" dt-column-defs="dtColumnDefs">
+										<thead class="not-fixed">
+										<tr>
+											<th>Status<span></span></th>
+											<th>Survey#<span></span></th>
+											<th>Survey Title<span></span></th>
+											<th ng-if="supplier == 'none' && buyer == 'none'">Buyer Account<span></span></th>
+											<th>Fielded vs Goal<span></span></th>
+											<th ng-if="buyer != 'none' || operator != 'none'">In Progress<span></span></th>
+											<th>Avg. CPI<span></span></th>
+											<th ng-if="operator != 'none'">EPC<span></span></th>
+											<th>Current IR<span></span></th>
+											<th>Country<span></span></th>
+											<th>Manage</th>
+										</tr>
+										</thead>
+										<tbody>
+										<tr ng-repeat="survey in liveSurveys track by $index">
+											<td>
+												<div class="dropdown survey-status">
+													<button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" ng-disabled="hideStatusEdit">
+														{{survey.status}} <i class="fa fa-angle-down" aria-hidden="true"></i>
+													</button>
+													<ul class="dropdown-menu" aria-labelledby="user-actions">
+														<li ng-if="survey.status != 'Live'"><a data-toggle="modal" data-target="#status-change-modal" ng-click="openStatusModal(survey.id, survey.encriptionId, 'Live', $index, survey.status)">Live</a></li>
+														<li ng-if="survey.status == 'Live'"><a data-toggle="modal" data-target="#status-change-modal"  ng-click="openStatusModal(survey.id, survey.encriptionId, 'Pause', $index, survey.status)">Paused</a></li>
+														<li ng-if="survey.status == 'Live' || survey.status == 'Pause'"><a data-toggle="modal" data-target="#status-change-modal" ng-click="openStatusModal(survey.id, survey.encriptionId, 'Closed', $index, survey.status)">Closed</a></li>
+													</ul>
+												</div>
+											</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.id}}</td>
+											<td class="survey-title" ng-click="openSurveyDetails(survey, $index)" title="{{survey.surveyTitle}}">{{survey.surveyTitle}}</td>
+											<td style="cursor:pointer;" class="buyer-account" ng-if="operatorFlg" ng-click="openSurveyDetails(survey, $index)">{{survey.buyer_accunt}}</td>
+											<td ng-if="supplier != 'none'" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.supplier[0].fielded | number:0}} | {{userCompany == survey.supplier[0].id ? (survey.supplier[0].quantity | number:0) :0}}</td>
+											<td ng-if="buyer != 'none' || operator != 'none'" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.Fielded | number:0}} | {{survey.number | number:0}}</td>
+											<td ng-if="buyer != 'none' || operator != 'none'" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.actualBuyerInProgress < 0 ? 0:survey.actualBuyerInProgress}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.averageCpi | currency:value = survey.currency_symbol}}</td>
+											<td ng-if="operator != 'none' && survey.epc != undefined" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.epc | currency:value = survey.currency_symbol}}</td>
+											<td ng-if="operator != 'none' && survey.epc == undefined" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{'NA'}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.incidence_current | number:0}}%</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.countryCode}}</td>
+
+											<td class="survey-edit" ng-show="hideManageSurvey || filterCompanyDetail || showManageSurvey" ng-if= "buyer == 'none'"><a ng-click="openSurveyDetails(survey, $index)"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></a></td>
+
+											<!-- PD-709 -->
+											<td class="survey-edit manage-col" ng-show="hideManageSurvey || filterCompanyDetail || showManageSurvey" ng-if= "buyer != 'none'">
+												<div class="dropdown">
+													<button class="btn btn-default dropdown-toggle survey-style" type="button" id="manage-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+														<i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+														<div class="clearfix" ></div>
+													</button>
+													<ul class="dropdown-menu" aria-labelledby="manage-options" data-animations="fadeInDown">
+														<li><a ng-click="openSurveyDetails(survey, $index)">Manage</a></li>
+														<li><a ng-click="cloneLiveSurvey(survey, $index)">Clone</a></li>
+													</ul>
+												</div>
+											</td>
+										</tr>
+										</tbody>
+									</table>
+									<div class="table-next-loader" ng-if="tableData.loading"></div>
+									<div class="table-entries-info">Showing 1 to {{liveSurveys.length}} of {{surveysCount.live}} entries</div>
+								</div>
+
+							</div>
+							<div  id="paused" ng-show="isSet('paused')">
+								<div class="survey-search">
+									<label>
+										Search
+										<input type="text" placeholder="Search Survey" ng-model="searchSurvey.query" ng-model-options='{ debounce: 1000 }' ng-change="searchSurveys('33')" />
+									</label>
+								</div>
+								<div class="" ng-if="!showSurveyDetails">
+									<table class="table dashbrd-table" datatable="ng" dt-options="dtOptions"  dt-columns="dtColumns" dt-column-defs="dtColumnDefs">
+										<thead class="not-fixed">
+										<tr>
+											<th>Status<span></span></th>
+											<th>Survey#<span></span></th>
+											<th>Survey Title<span></span></th>
+											<th ng-if="supplier == 'none' && buyer == 'none'">Buyer Account<span></span></th>
+											<th>Fielded vs Goal<span></span></th>
+											<th ng-if="buyer != 'none' || operator != 'none'">In Progress<span></span></th>
+											<th>Avg. CPI<span></span></th>
+											<th ng-if="operator != 'none'">EPC<span></span></th>
+											<th>Current IR<span></span></th>
+											<th>Country<span></span></th>
+											<th>Manage</th>
+										</tr>
+										</thead>
+										<tbody>
+										<tr ng-repeat="survey in pausedSurveys track by $index">
+											<td>
+												<div class="dropdown survey-status">
+													<button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" ng-disabled="hideStatusEdit">
+														{{survey.status}} <i class="fa fa-angle-down" aria-hidden="true"></i>
+													</button>
+													<ul class="dropdown-menu" aria-labelledby="user-actions">
+														<li ng-if="survey.status != 'Live'"><a data-toggle="modal" data-target="#status-change-modal" ng-click="openStatusModal(survey.id, survey.encriptionId, 'Live', $index, survey.status)">Live</a></li>
+														<li ng-if="survey.status == 'Live'"><a data-toggle="modal" data-target="#status-change-modal"  ng-click="openStatusModal(survey.id, survey.encriptionId, 'Pause', $index, survey.status)">Paused</a></li>
+														<li ng-if="survey.status == 'Live' || survey.status == 'Pause'"><a data-toggle="modal" data-target="#status-change-modal" ng-click="openStatusModal(survey.id, survey.encriptionId, 'Closed', $index, survey.status)">Closed</a></li>
+													</ul>
+												</div>
+											</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.id}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" class="survey-title" title="{{survey.surveyTitle}}">{{survey.surveyTitle}}</td>
+											<td class="buyer-account" ng-if="operatorFlg"> <!-- PD-628 -->{{survey.buyer_accunt}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;" ng-if="supplier != 'none'">{{survey.Fielded | number:0}} | {{userCompany == survey.supplier[0].id ? (survey.supplier[0].quantity | number:0):0}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;" ng-if="buyer != 'none' || operator != 'none'">{{survey.Fielded | number:0}} | {{survey.number | number:0}}</td>
+											<td ng-if="buyer != 'none' || operator != 'none'" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.actualBuyerInProgress < 0 ? 0:survey.actualBuyerInProgress}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.averageCpi | currency:value = survey.currency_symbol}}</td>
+											<td ng-if="operator != 'none' && survey.epc != undefined" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.epc | currency:value = survey.currency_symbol}}</td>
+											<td ng-if="operator != 'none' && survey.epc == undefined" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{'NA'}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.incidence_current | number:0}}%</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.countryCode}}</td>
+											<td class="survey-edit" ng-show="hideManageSurvey || filterCompanyDetail || showManageSurvey" ng-if= "buyer == 'none'"><a ng-click="openSurveyDetails(survey, $index)"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></a></td>
+
+											<!-- PD-709 -->
+											<td class="survey-edit manage-col" ng-show="hideManageSurvey || filterCompanyDetail || showManageSurvey" ng-if= "buyer != 'none'">
+												<div class="dropdown">
+													<button class="btn btn-default dropdown-toggle survey-style" type="button" id="manage-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+														<i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+														<div class="clearfix" ></div>
+													</button>
+													<ul class="dropdown-menu" aria-labelledby="manage-options" data-animations="fadeInDown">
+														<li><a ng-click="openSurveyDetails(survey, $index)">Manage</a></li>
+														<li><a ng-click="cloneLiveSurvey(survey, $index)">Clone</a></li>
+													</ul>
+												</div>
+											</td>
+										</tr>
+										</tbody>
+									</table>
+									<div class="table-next-loader" ng-if="tableData.loading"></div>
+									<div class="table-entries-info">Showing 1 to {{pausedSurveys.length}} of {{surveysCount.pause}} entries</div>
+								</div>
+
+							</div>
+							<div  id="drafts" ng-show="isSet('drafts')">
+								<div class="survey-search">
+									<label>
+										Search
+										<input type="text" placeholder="Search Survey" ng-model="searchSurvey.query" ng-model-options='{ debounce: 1000 }' ng-change="searchSurveys('11')" />
+									</label>
+								</div>
+								<div class="" ng-if="!showSurveyDetails">
+									<table class="table dashbrd-table" datatable="ng" dt-options="dtOptions"  dt-columns="dtColumns" dt-column-defs="dtColumnDefs">
+										<thead class="not-fixed">
+										<tr>
+											<th>Status<span></span></th>
+											<th>Survey#<span></span></th>
+											<th>Survey Title<span></span></th>
+											<th>Fielded vs Goal<span></span></th>
+											<th ng-if="buyer != 'none' || operator != 'none'">In Progress<span></span></th>
+											<th>Avg. CPI<span></span></th>
+											<th ng-if="operator != 'none'">EPC<span></span></th>
+											<th>Current IR<span></span></th>
+											<th>Country<span></span></th>
+											<th>Manage</th>
+										</tr>
+										</thead>
+										<tbody>
+										<tr ng-repeat="survey in draftSurveys track by $index">
+											<td>
+												<div class="dropdown survey-status">
+													<button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" ng-disabled="survey.status == 'Draft'">
+														{{survey.status}} <i class="fa fa-angle-down" aria-hidden="true"></i>
+													</button>
+													<ul class="dropdown-menu" aria-labelledby="user-actions">
+														<li ng-if="survey.status != 'Live'"><a data-toggle="modal" data-target="#status-change-modal" ng-click="openStatusModal(survey.id, survey.encriptionId, 'Live', $index, survey.status)">Live</a></li>
+														<li ng-if="survey.status == 'Live'"><a data-toggle="modal" data-target="#status-change-modal"  ng-click="openStatusModal(survey.id, survey.encriptionId, 'Pause', $index, survey.status)">Paused</a></li>
+														<li ng-if="survey.status == 'Live' || survey.status == 'Pause'"><a data-toggle="modal" data-target="#status-change-modal" ng-click="openStatusModal(survey.id, survey.encriptionId, 'Closed', $index, survey.status)">Closed</a></li>
+													</ul>
+												</div>
+											</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.id}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" class="survey-title" title="{{survey.surveyTitle}}">{{survey.surveyTitle}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.Fielded | number:0}} | {{survey.number | number:0}}</td>
+											<td ng-if="buyer != 'none' || operator != 'none'" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">NA</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">NA</td>
+											<td ng-if="operator != 'none' && survey.epc != undefined" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.epc | currency:value = survey.currency_symbol}}</td>
+											<td ng-if="operator != 'none' && survey.epc == undefined" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{'NA'}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">NA</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.countryCode}}</td>
+											<td class="survey-edit"><a ng-click="openSurveyDetails(survey, $index);clearDataFunc()"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></a><a data-toggle="modal" class="delete-survey" data-target="#survey-delete-modal" ng-click="deleteModal(survey.id, survey.encriptionId)"><span class="glyphicon glyphicon-trash"></span></a></td>
+										</tr>
+										</tbody>
+									</table>
+									<div class="table-next-loader" ng-if="tableData.loading"></div>
+									<div class="table-entries-info">Showing 1 to {{draftSurveys.length}} of {{surveysCount.drafts}} entries</div>
+								</div>
+
+							</div>
+							<div id="closed" ng-show="isSet('closed')">
+								<div class="survey-search">
+									<label>
+										Search
+										<input type="text" placeholder="Search Survey" ng-model="searchSurvey.query" ng-model-options='{ debounce: 1000 }' ng-change="searchSurveys('44')" />
+									</label>
+								</div>
+								<div class="" ng-if="!showSurveyDetails">
+									<table class="table dashbrd-table" datatable="ng" dt-options="dtOptions"  dt-columns="dtColumns" dt-column-defs="dtColumnDefs">
+										<thead class="not-fixed">
+										<tr>
+											<th>Status <span></span></th>
+											<th>Survey# <span></span></th>
+											<th>Survey Title <span></span></th>
+											<th ng-if="supplier == 'none' && buyer == 'none'">Buyer Account <span></span></th>
+											<th>Fielded vs Goal <span></span></th>
+											<th ng-if="buyer != 'none' || operator != 'none'">In Progress<span></span></th>
+											<th>Avg. CPI<span></span></th>
+											<th ng-if="operator != 'none'">EPC<span></span></th>
+											<th>Current IR<span></span></th>
+											<th>Country <span></span></th>
+											<th>Manage</th>
+										</tr>
+										</thead>
+										<tbody>
+										<tr ng-repeat="survey in closeSurveys track by $index">
+											<td>
+												<div class="dropdown survey-status">
+													<button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" ng-disabled="survey.status == 'Closed'">
+														{{survey.status}} <i class="fa fa-angle-down" aria-hidden="true"></i>
+													</button>
+													<ul class="dropdown-menu" aria-labelledby="user-actions">
+														<li ng-if="survey.status != 'Live'"><a data-toggle="modal" data-target="#status-change-modal" ng-click="openStatusModal(survey.id, survey.encriptionId, 'Live', $index, survey.status)">Live</a></li>
+														<li ng-if="survey.status == 'Live'"><a data-toggle="modal" data-target="#status-change-modal"  ng-click="openStatusModal(survey.id, survey.encriptionId, 'Pause', $index, survey.status)">Paused</a></li>
+														<li ng-if="survey.status == 'Live' || survey.status == 'Pause'"><a data-toggle="modal" data-target="#status-change-modal" ng-click="openStatusModal(survey.id, survey.encriptionId, 'Closed', $index, survey.status)">Closed</a></li>
+													</ul>
+												</div>
+											</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.id}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" class="survey-title" title="{{survey.surveyTitle}}">{{survey.surveyTitle}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;" class="buyer-account" ng-if="operatorFlg"> <!-- PD-628 -->{{survey.buyer_accunt}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;" ng-if="supplier != 'none'">{{survey.Fielded | number:0}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;" ng-if="buyer != 'none' || operator != 'none'">{{survey.Fielded | number:0}} | {{survey.number | number:0}}</td>
+											<td ng-if="buyer != 'none' || operator != 'none'" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.actualBuyerInProgress < 0 ? 0:survey.actualBuyerInProgress}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.averageCpi | currency:value = survey.currency_symbol}}</td>
+											<td ng-if="operator != 'none' && survey.epc != undefined" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.epc | currency:value = survey.currency_symbol}}</td>
+											<td ng-if="operator != 'none' && survey.epc == undefined" ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{'NA'}}</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.incidence_current | number:0}}%</td>
+											<td ng-click="openSurveyDetails(survey, $index)" style="cursor:pointer;">{{survey.countryCode}}</td>
+											<td class="survey-edit" ng-show="hideManageSurvey || filterCompanyDetail || showManageSurvey" ng-if= "buyer == 'none'"><a ng-click="openSurveyDetails(survey, $index)"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></a></td>
+											<!-- PD-709 -->
+											<td class="survey-edit manage-col" ng-show="hideManageSurvey || filterCompanyDetail || showManageSurvey" ng-if="buyer != 'none'">
+												<div class="dropdown">
+													<button class="btn btn-default dropdown-toggle survey-style" type="button" id="manage-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+														<i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+														<div class="clearfix" ></div>
+													</button>
+													<ul class="dropdown-menu" aria-labelledby="manage-options" data-animations="fadeInDown">
+														<li><a ng-click="openSurveyDetails(survey, $index)">Manage</a></li>
+														<li><a ng-click="cloneLiveSurvey(survey, $index)">Clone</a></li>
+													</ul>
+												</div>
+											</td>
+										</tr>
+										</tbody>
+									</table>
+									<div class="table-next-loader" ng-if="tableData.loading"></div>
+									<div class="table-entries-info">Showing 1 to {{closeSurveys.length}} of {{surveysCount.closed}} entries</div>
+								</div>
+
+							</div>
+						</div>
+						<div class="clearfix"></div>
+					</div>
+					<!-- survey details view -->
+					<div class="dashbdr-survey-detail" ng-if="showSurveyDetails">
+						<div class="survey-detail-back-btn">
+							<a ng-click="closeSurveyDetails(surveyDetails.status)" ><i class="fa fa-angle-left" aria-hidden="true"></i>Back to {{surveyDetails.status}} Surveys</a>
+						</div>
+						<div class="survey-detail-header">
+							<div class="col-md-6 pad0 text-left">
+								<p>Survey# {{surveyDetails.id}}</p>
+								<div class="dropdown survey-status">
+									<button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"  ng-disabled="hideStatusEdit|| surveyDetails.status == 'Closed'">
+										{{surveyDetails.status}} <i class="fa fa-angle-down" aria-hidden="true"></i>
+									</button>
+									<ul class="dropdown-menu" aria-labelledby="user-actions">
+										<li ng-if="surveyDetails.status != 'Live'"><a data-toggle="modal" data-target="#status-change-modal" ng-click="openStatusModal(surveyDetails.id, surveyDetails.encriptionId, 'Live', toUpdate.itemIndex, surveyDetails.status)">Live</a></li>
+										<li ng-if="surveyDetails.status == 'Live'"><a data-toggle="modal" data-target="#status-change-modal"  ng-click="openStatusModal(surveyDetails.id, surveyDetails.encriptionId, 'Pause', toUpdate.itemIndex, surveyDetails.status)">Paused</a></li>
+										<li ng-if="surveyDetails.status == 'Live' || surveyDetails.status == 'Pause'"><a data-toggle="modal" data-target="#status-change-modal" ng-click="openStatusModal(surveyDetails.id, surveyDetails.encriptionId, 'Closed', toUpdate.itemIndex, surveyDetails.status)">Closed</a></li>
+									</ul>
+								</div>
+							</div>
+							<div class="col-md-6 pad0 pull-right text-right">
+								<p>{{srvMgeDetails.countryName}} <flag style="    vertical-align: 6px;" country="{{srvMgeDetails.countryCode == 'UK'?'GB':srvMgeDetails.countryCode}}" size="32"></flag></p>
+							</div>
+							<div class="clearfix"></div>
+						</div>
+						<div class="survey-detail-content">
+							<h2 class="text-left">{{surveyDetails.surveyTitle}}</h2>
+							<div class="survey-content-boxes">
+								<div class="survey-content-box-inner">
+									<h6>Fielded vs. Goal</h6>
+									<p>{{srvMgeDetails.fielded | number:0}} | {{srvMgeDetails.goal | number:0}}</p>
+									<!--<span ng-if="!filterCompanyDetail" style="font-size:11px;">Questionalble Completes(3)</span>-->
+									<!-- PD-754 -->
+									<div class="net-complete-box">
+										<p class="text-center">
+											Net of {{srvMgeDetails.recCompltCount + srvMgeDetails.manualFixCompltCount}} adjustments
+											<div class="help-tip">
+												<i class="fa fa-info-circle" aria-hidden="true"></i>
+										<p style="white-space: normal;">
+											Net Number of completes that have been Manually Fixed: <br>{{srvMgeDetails.manualFixCompltCount}} <br>Net Number of completes that have been Buyer Reconciled : <br/>{{srvMgeDetails.recCompltCount}}
+										</p>
+									</div>
+									</p>
+								</div>
+							</div>
+							<div class="survey-content-box-inner">
+
+								<h6  ng-if="filterCompanyDetail">Total Revenue</h6>
+								<h6 ng-if="!filterCompanyDetail">Total Cost</h6>
+								<div class="dropdown survey-status">
+									<button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+										{{totalCostMode}}
+									</button>
+									<ul class="dropdown-menu" aria-labelledby="user-actions">
+										<!--change for PD-389-->
+										<li ng-if="operator != 'none'" ng-click="changeTotalCostMode('At Launch')"><a>At Launch</a></li>
+										<li ng-if="!filterCompanyDetail" ng-click="changeTotalCostMode('At Launch')"><a>At Launch</a></li>
+
+										<li ng-if="operator != 'none'" ng-click="changeTotalCostMode('Projected')"><a>Projected</a></li>
+										<li ng-if="!filterCompanyDetail" ng-click="changeTotalCostMode('Projected')"><a>Projected</a></li>
+										<li ng-if="!filterCompanyDetail" ng-click="changeTotalCostMode('Current')"><a>Current</a></li>
+										<li ng-if="filterCompanyDetail" ng-click="changeTotalCostMode('Current')"><a>Current</a></li>
+										<li ng-if="filterCompanyDetail && operator == 'none'" ng-click="changeTotalCostMode('Projected')"><a>Projected</a></li>
+									</ul>
+								</div>
+								<!--change for PD-389-->
+								<span ng-if="operator != 'none' && totalCostMode == 'At Launch'">{{srvMgeDetails.total_cost_launch | currency:value = currency_symbol}}</span>
+								<span ng-if=" !filterCompanyDetail && totalCostMode == 'At Launch'">{{srvMgeDetails.total_cost_launch | currency:value = currency_symbol}}</span>
+
+
+								<span ng-if="operator != 'none' && totalCostMode == 'Projected'">{{srvMgeDetails.total_cost_projected | currency:value = currency_symbol}}</span>
+								<span ng-if=" !filterCompanyDetail && totalCostMode == 'Projected'">{{srvMgeDetails.total_cost_projected | currency:value = currency_symbol}}</span>
+								<span ng-if="filterCompanyDetail && operator == 'none' && totalCostMode == 'Projected'">{{srvMgeDetails.total_cost_projected | currency:value = currency_symbol}}</span>
+								<span ng-if="!filterCompanyDetail && totalCostMode == 'Current'">{{srvMgeDetails.total_cost_current | currency:value = currency_symbol}}</span>
+								<span ng-if="filterCompanyDetail && totalCostMode == 'Currently'">{{srvMgeDetails.total_cost_current | currency:value = currency_symbol}}</span>
+								<span ng-if="filterCompanyDetail && totalCostMode == 'Current'">{{srvMgeDetails.total_cost_current | currency:value = currency_symbol}}</span>
+							</div>
+							<div class="survey-content-box-inner cpi-box">
+								<h6>CPI</h6>
+								<div class="dropdown survey-status" >
+									<button class="btn btn-default dropdown-toggle survey-style" type="button" id="cpi-details-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+										{{cpiMode}}
+									</button>
+									<ul class="dropdown-menu" aria-labelledby="cpi-details-1">
+										<!--change for PD-389-->
+										<li ng-if="operator != 'none'" ng-click="changeCpiMode('Projected')"><a>Projected</a></li>
+										<li ng-if="!filterCompanyDetail" ng-click="changeCpiMode('Projected')"><a>Projected</a></li>
+
+										<li ng-if="operator != 'none'" ng-click="changeCpiMode('At Launch')"><a>At Launch</a></li>
+										<li ng-if="!filterCompanyDetail" ng-click="changeCpiMode('At Launch')"><a>At Launch</a></li>
+
+										<li ng-if="isSupplierFielded" ng-click="changeCpiMode('At Launch')"><a>At Launch</a></li>
+										<li ng-click="changeCpiMode('Current')"><a>Current</a></li>
+										<li ng-click="changeCpiMode('Average')"><a>Average</a></li>
+									</ul>
+								</div>
+								<div class="survey-status">|</div>
+								<div class="dropdown survey-status">
+									<button class="btn btn-default dropdown-toggle survey-style" type="button" id="cpi-details-2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+										{{acpiMode}}
+									</button>
+									<ul class="dropdown-menu" aria-labelledby="cpi-detail-2">
+										<li ng-if="operator != 'none'" ng-click="changeAcpiMode('Projected')"><a>Projected</a></li>
+										<li ng-if="!filterCompanyDetail" ng-click="changeAcpiMode('Projected')"><a>Projected</a></li>
+
+										<li ng-if="operator != 'none'" ng-click="changeAcpiMode('At Launch')"><a>At Launch</a></li>
+										<li ng-if="!filterCompanyDetail" ng-click="changeAcpiMode('At Launch')"><a>At Launch</a></li>
+
+										<li ng-if="isSupplierFielded" ng-click="changeAcpiMode('At Launch')"><a>At Launch</a></li>
+										<li ng-click="changeAcpiMode('Current')"><a>Current</a></li>
+										<li ng-click="changeAcpiMode('Average')"><a>Average</a></li>
+									</ul>
+								</div>
+
+								<!--change for PD-389-->
+								<div>
+									<span ng-if="operator != 'none' && cpiMode == 'Projected'">{{srvMgeDetails.cpi_projected | currency:value = currency_symbol}}</span>
+									<span ng-if=" !filterCompanyDetail && cpiMode == 'Projected'">{{srvMgeDetails.cpi_projected | currency:value = currency_symbol}}</span>
+
+									<span ng-if="operator != 'none' && cpiMode == 'At Launch'">{{srvMgeDetails.cpi_launch | currency:value = currency_symbol}}</span>
+									<span ng-if=" !filterCompanyDetail && cpiMode == 'At Launch'">{{srvMgeDetails.cpi_launch | currency:value = currency_symbol}}</span>
+									<span ng-if=" isSupplierFielded && cpiMode == 'At Launch'">{{srvMgeDetails.cpi_launch | currency:value = currency_symbol}}</span>
+									<span ng-if="!filterCompanyDetail && cpiMode == 'Current'">{{srvMgeDetails.cpi_current ? srvMgeDetails.cpi_current : 0 | currency:value = currency_symbol}}</span>
+									<span ng-if="filterCompanyDetail && cpiMode == 'Current'">{{srvMgeDetails.cpi_current ? srvMgeDetails.cpi_current : 0 | currency:value = currency_symbol}}</span>
+									<span ng-if="!filterCompanyDetail && cpiMode == 'Average'">{{srvMgeDetails.total_cost_current !== 0 ? srvMgeDetails.total_cost_current / srvMgeDetails.fielded : 0 | currency:value = currency_symbol}}</span>
+									<span ng-if="filterCompanyDetail && cpiMode == 'Average'">{{srvMgeDetails.total_cost_current !== 0 ? srvMgeDetails.total_cost_current / srvMgeDetails.fielded : 0| currency:value = currency_symbol}}</span>|
+									<!--change for acpi dropdown-->
+									<span ng-if="operator != 'none' && acpiMode == 'Projected'">{{srvMgeDetails.cpi_projected | currency:value = currency_symbol}}</span>
+									<span ng-if=" !filterCompanyDetail && acpiMode == 'Projected'">{{srvMgeDetails.cpi_projected | currency:value = currency_symbol}}</span>
+
+									<span ng-if="operator != 'none' && acpiMode == 'At Launch'">{{srvMgeDetails.cpi_launch | currency:value = currency_symbol}}</span>
+									<span ng-if=" !filterCompanyDetail && acpiMode == 'At Launch'">{{srvMgeDetails.cpi_launch | currency:value = currency_symbol}}</span>
+									<span ng-if=" isSupplierFielded && acpiMode == 'At Launch'">{{srvMgeDetails.cpi_launch | currency:value = currency_symbol}}</span>
+									<span ng-if="!filterCompanyDetail && acpiMode == 'Current'">{{srvMgeDetails.cpi_current ? srvMgeDetails.cpi_current : 0  | currency:value = currency_symbol}}</span>
+									<span ng-if="filterCompanyDetail && acpiMode == 'Current'">{{srvMgeDetails.cpi_current ? srvMgeDetails.cpi_current : 0  | currency:value = currency_symbol}}</span>
+									<span ng-if="!filterCompanyDetail && acpiMode == 'Average'">{{srvMgeDetails.total_cost_current !== 0 ? srvMgeDetails.total_cost_current / srvMgeDetails.fielded : 0  | currency:value = currency_symbol}}</span>
+									<span ng-if="filterCompanyDetail && acpiMode == 'Average'">{{srvMgeDetails.total_cost_current !== 0 ? srvMgeDetails.total_cost_current / srvMgeDetails.fielded : 0 | currency:value = currency_symbol}}</span>
+								</div>
+							</div>
+							<div class="survey-content-box-inner">
+								<h6>LOI</h6>
+								<div class="dropdown survey-status">
+									<button class="btn btn-default dropdown-toggle survey-style" type="button" id="loi-details" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+										{{loiMode}}
+									</button>
+									<ul class="dropdown-menu" aria-labelledby="loi-details">
+										<li ng-if="operator != 'none'" ng-click="changeLoiMode('At Launch')"><a>At Launch</a></li>
+										<li ng-if="!filterCompanyDetail" ng-click="changeLoiMode('At Launch')"><a>At Launch</a></li>
+										<li ng-if="isSupplierFielded" ng-click="changeLoiMode('At Launch')"><a>At Launch</a></li>
+										<li  ng-click="changeLoiMode('Overall')"><a>Overall</a></li>
+										<!-- PD-1142 -->
+										<li ng-click="changeLoiMode('Recent')"><a>Recent</a></li>
+										<!--  <li   ng-if="filterCompanyDetail" ng-click="changeLoiMode('At Launch')"><a>At Launch</a></li>-->
+									</ul>
+								</div>
+								<span ng-if="operator != 'none' && loiMode == 'At Launch'">{{srvMgeDetails.loi_launch | number:0}} mins</span>
+								<span ng-if="!filterCompanyDetail && loiMode == 'At Launch'">{{srvMgeDetails.loi_launch | number:0}} mins</span>
+								<span ng-if="isSupplierFielded && loiMode == 'At Launch'">{{srvMgeDetails.loi_launch | number:0}} mins</span>
+								<span ng-if="!filterCompanyDetail && loiMode == 'Overall'">{{srvMgeDetails.loi_current | number:0}} mins</span>
+								<span ng-if="filterCompanyDetail && loiMode == 'Overall'">{{srvMgeDetails.loi_current | number:0}} mins</span>
+								<!-- PD-1142 -->
+								<span ng-if="loiMode == 'Recent'">{{srvMgeDetails.recent_loi | number:0}} mins</span>
+								<!--<span ng-if="filterCompanyDetail && loiMode == 'At Launch'">{{srvMgeDetails.loi_launch | number:0}} mins</span>-->
+							</div>
+							<div class="survey-content-box-inner">
+								<h6>Incidence</h6>
+								<div class="dropdown survey-status">
+									<button class="btn btn-default dropdown-toggle survey-style" type="button" id="incidence-details" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+										{{incidenceMode}}
+									</button>
+									<ul class="dropdown-menu" aria-labelledby="incidence-details">
+										<li ng-if="operator != 'none'" ng-click="changeIncidenceMode('At Launch')"><a>At Launch</a></li>
+										<li ng-if="!filterCompanyDetail" ng-click="changeIncidenceMode('At Launch')"><a>At Launch</a></li>
+										<li ng-if="isSupplierFielded === true" ng-click="changeIncidenceMode('At Launch')"><a>At Launch</a></li>
+										<li ng-if="!filterCompanyDetail"  ng-click="changeIncidenceMode('Overall')"><a>Overall</a></li>
+										<li ng-if="filterCompanyDetail" ng-click="changeIncidenceMode('Overall')"><a>Overall</a></li>
+										<!-- PD-1142 -->
+										<li ng-click="changeIncidenceMode('Recent')"><a>Recent</a></li>
+
+
+										<!-- <li ng-if="filterCompanyDetail" ng-click="changeIncidenceMode('At Launch')"><a>At Launch</a></li>-->
+									</ul>
+								</div>
+								<span ng-if="operator != 'none' &&  incidenceMode == 'At Launch'">{{srvMgeDetails.incidence_launch | number:0}}<span ng-if="srvMgeDetails.incidence_launch != 'null' && srvMgeDetails.incidence_launch != ''">%</span></span>
+
+								<span ng-if="!filterCompanyDetail &&  incidenceMode == 'At Launch'">{{srvMgeDetails.incidence_launch | number:0}}<span ng-if="srvMgeDetails.incidence_launch != 'null' && srvMgeDetails.incidence_launch != ''">%</span></span>
+
+								<span ng-if="isSupplierFielded && incidenceMode == 'At Launch'">{{srvMgeDetails.incidence_launch | number:0}}<span ng-if="srvMgeDetails.incidence_launch != null && srvMgeDetails.incidence_launch != ''">%</span></span>
+
+								<span ng-if="!filterCompanyDetail &&  incidenceMode == 'Overall'">{{srvMgeDetails.incidence_current | number:0}}<span ng-if="srvMgeDetails.incidence_current != undefined && srvMgeDetails.incidence_current != null">%</span></span>
+
+								<span ng-if="filterCompanyDetail && incidenceMode == 'Overall'">{{srvMgeDetails.incidence_current | number:0}}<span ng-if="srvMgeDetails.incidence_current != undefined && srvMgeDetails.incidence_current != null">%</span></span>
+
+								<!-- PD-1142 -->
+								<span ng-if="incidenceMode == 'Recent'">{{srvMgeDetails.recent_incidence | number:0}}<span ng-if="srvMgeDetails.recent_incidence != undefined && srvMgeDetails.recent_incidence != null">%</span></span>
+
+								<!--<span ng-if="filterCompanyDetail && incidenceMode == 'At Launch'">{{srvMgeDetails.incidence_launch | number:0}}<span ng-if="srvMgeDetails.incidence_current != undefined && srvMgeDetails.incidence_current != null">%</span></span>-->
+							</div>
+							<div class="clearfix"></div>
+						</div>
+					</div>
+					<div class="survey-detail-tabs">
+						<!-- Nav tabs LIVE -->
+						<ul class="nav nav-tabs custom-tabs" role="tablist">
+							<li role="presentation" class="active" ng-class="{ active: isSet('quotas') }"><a href="" aria-controls="quotas" role="tab" data-toggle="tab" ng-click="setTab('quotas')">Quotas</a></li>
+							<li role="presentation" ng-class="{ active: isSet('audience') }"><a href="" aria-controls="audience" role="tab" data-toggle="tab" ng-click="setTab('audience')">Audience</a></li>
+							<li role="presentation" ng-if="supplier == 'none'" ng-class="{ active: isSet('suppliers') }"><a href="" aria-controls="suppliers" role="tab" data-toggle="tab" ng-click="setTab('suppliers')" >Suppliers</a></li>
+							<li role="presentation" ng-if="filterCompanyDetail" ng-class="{ active: isSet('linkdetail_suppliers') }"> <a href="" aria-controls="linkdetail_suppliers" role="tab" data-toggle="tab" ng-click="setLink(surveyDetails); setTab('linkdetail_suppliers'); ">Links/Other Details</a></li>
+							<li role="presentation" ng-class="{ active: isSet('reports') }"><a href="" aria-controls="reports" role="tab" data-toggle="tab" data-ng-click="setTab('reports')">Reports</a></li>
+							<li role="presentation" ng-if="!filterCompanyDetail" ng-class="{ active: isSet('linkdetail_buyer') }"><a href="" aria-controls="linkdetail_buyer" role="tab" data-toggle="tab" ng-click="setLink(surveyDetails); setTab('linkdetail_buyer'); ">Links/Other Details</a></li>
+							<li role="presentation" ng-if="operator != 'none' " ng-class="{ active: isSet('buyer_reconcile') }"><a href="" aria-controls="buyer_reconcile" role="tab" data-toggle="tab" ng-click="setLink(surveyDetails); setTab('buyer_reconcile'); languageFn(surveyDetails.language) ">Reconcile</a></li>
+							<li role="presentation" ng-if="supplier == 'none'" ng-class="{ active: isSet('activityLogs') }"><a href="" aria-controls="activityLogs" role="tab" data-toggle="tab" data-ng-click="setTab('activityLogs'); getActivityLogs(surveyDetails.id)">Activity Logs</a></li>
+							
+						</ul>
+						<!-- Tab panes -->
+						<div class="tab-content">
+							<div  id="quotas"  ng-show="isSet('quotas')"  >
+								<!-- PD-821 Start direct edit and update all currently open quota in bulk -->
+								<div class="templateRoot group-edit" ng-if="srvQtaMgeDetails.quotas.gender[0].hasValidQuotas ||
+								srvQtaMgeDetails.quotas.children[0].hasValidQuotas ||
+								srvQtaMgeDetails.quotas.age[0].hasValidQuotas || srvQtaMgeDetails.quotas.houseHoldIncome[0].hasValidQuotas || srvQtaMgeDetails.quotas.race[0].hasValidQuotas || srvQtaMgeDetails.quotas.relationships[0].hasValidQuotas || srvQtaMgeDetails.quotas.employments[0].hasValidQuotas|| srvQtaMgeDetails.quotas.educations[0].hasValidQuotas || srvQtaMgeDetails.quotas.device[0].hasValidQuotas || srvQtaMgeDetails.quotas.regions.length ||srvQtaMgeDetails.quotas.divisions.length ||srvQtaMgeDetails.quotas.states.length || srvQtaMgeDetails.quotas.csa.length  || srvQtaMgeDetails.quotas.dma.length || srvQtaMgeDetails.quotas.msa.length ||srvQtaMgeDetails.quotas.county.length || srvQtaMgeDetails.quotas.zipcodes.length || srvQtaMgeDetails.nestedQuotas.length || srvQtaMgeDetails.groupedCatQuotas.length || !(srvQtaMgeDetails.advanceQuotas | isObjEmpty)" ng-show="operator != 'none' || buyer != 'none'">
+									<form class="form-inline" >
+										<div class="grouped_fieldMgmt">
+											<div class="inside_first_groupMgmt" ng-if="supplier == 'none'">
+												<div>View By</div>
+												<div class="btn-group">
+													<button type="button" class="btn btn-primary viwe_by_quota" ng-click="quotaViewFlags.quotaview = true; quotaViewFlags.supplierview = false" ng-class="{'quotaview_active' : quotaViewFlags.quotaview == true ? quotaViewFlags.quotaview : false}">Quota</button>
+													<button type="button" class="btn btn-primary view_by_supplier" ng-click="quotaViewFlags.supplierview = true; quotaViewFlags.quotaview = false" ng-class="{'supplierview_active': quotaViewFlags.supplierview == true ? quotaViewFlags.supplierview : false}">Supplier</button>
+												</div>
+											</div>
+											<div class="inside_scnd_groupMgmt" ng-if="!quotaViewFlags.supplierview">
+												<div>Grouped Field Management :</div>
+												<div class="form-group">
+
+													<button type="button" class="btn btn-primary btn-round-sm btn-sm" ng-class="{'sliderBGcolorChng' : lockUnlockGroupStatus.groupLockUnlockStatus == false? true: false, 'muteSliderColor': lockUnlockGroupStatus.fadeoptcitylock == true? lockUnlockGroupStatus.fadeoptcitylock: false}" ng-click="updateLockUnlockQuotaGroup(srvQtaMgeDetails.survey_id)">{{lockUnlockGroupStatus.groupLockUnlockStatus == true? "Unlock" :"Lock"}}
+													</button>&nbsp;&nbsp;&nbsp;
+
+													<label class="control-label" style="font-size: 12px;">Current Target</label>
+													<input style="width: 15%;" ng-model="editCurrentTarget.value" type="text" class="form-control" onkeypress="return validateqty(this, event);">
+
+													<select class="form-control" ng-model="editCurrentTarget.type" ng-init="editCurrentTarget.type = 'Percentage'">
+														<option value="Number" selected="selected">Number</option>
+														<option value="Percentage">Percentage</option>
+													</select>
+													<div class="edit-button-group">
+														<div class="glyphicon glyphicon-ok"  ng-click="saveCurrentlyOpendata(srvQtaMgeDetails.survey_id)"></div>
+													</div>
+												</div>
+											</div>
+										</div>
+
+									</form>
+								</div>
+								<div class="table-responsive">
+									<p class="text-center" ng-if="srvQtaMgeDetails.nestedQuotas.length == 0 && srvQtaMgeDetails.groupedCatQuotas.length == 0 && (srvQtaMgeDetails.advanceQuotas | isObjEmpty) && ((srvQtaMgeDetails.quotas | isObjEmpty) || (srvQtaMgeDetails.quotas | isObjKeysEmpty))">Survey has no Quotas</p>
+									<!--**********Simple Quotas**********-->
+									<div class="surveyDetailsTableWrapper" ng-repeat="quota in srvQtaMgeDetails.quotas" ng-if="quota.length && quota[0].hasValidQuotas && quotaViewFlags.quotaview">
+										<table class="table survey-detail-table" ng-class="{'supplier-dashboard-quotas':filterCompanyDetail}">
+											<thead>
+												<tr>
+													<!-- PD-1263 Csa to CSBA -->
+													<th ng-if="quota[0].qual_id >= 223 && quota[0].qual_id <= 233" ng-bind=getLocName(quota[0].qualification_name)></th>
+													<th class="text-left" ng-if="!(quota[0].qual_id >= 223 && quota[0].qual_id <= 231)" >{{quota[0].qualification_name}}</th>
+													<th class="text-center">{{surveyDetails.clickBalance == 1? "Click Fielded Vs Click Goal":"Fielded Vs Goal"}}</th>
+													<th class="text-center min-wid-130" ng-if="operator != 'none' || buyer != 'none'">
+														<lable>{{surveyDetails.clickBalance == 1? "Clicks Current Target":"Current Target"}}<div class="help-tip">
+															<i class="fa fa-info-circle" aria-hidden="true"></i>
+															<p><span>For Field Management, you can change the Currently Open amount by changing the Current Target. Currently Open = Current Target - Achieved.</span></p>
+														</div> </lable>
+													</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">Currently Open</th>
+													<th class="text-center" ng-if="operator != 'none' || supplier != 'none'">Supplier Currently Open</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{surveyDetails.clickBalance == 1? "Completes":"Valid Clicks"}}</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">Last Start Date</th>
+													<th class="text-center">Last Complete Date</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">Conversion</th>
+													<th class="text-center" ng-if="!filterCompanyDetail && surveyDetails.clickBalance == 0">Max</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">In Progress</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'"> </th>
+												</tr>
+											</thead>
+											<tbody ng-repeat="item in quota track by $index">
+												<tr ng-class="{'quotagroupselected': item.editCurrntTrgtActive == true ?item.editCurrntTrgtActive : item.editCurrntTrgtActive = false, 'editmarkcolorchange': checkhover}" ng-click="item.editCurrntTrgtActive = !item.editCurrntTrgtActive; checkGroupLockUnlockQuotaStatus(srvQtaMgeDetails.survey_id, quota[0].qualification_name, item.unique_id)" ng-mouseenter="checkhover = true" ng-mouseleave="checkhover = false" data-toggle="collapse" data-target="#layerd{{item.unique_id}}" class="accordion-toggle supplier_accordian">
+													<td ng-if="quota[0].qualification_name != 'zipcodes'" class="text-left">{{item.name | breakArrayAndJoin}}<a ng-click="lockQuota(srvQtaMgeDetails.survey_id, quota[0].qualification_name, item.quota_id, !item.locked, $index, item.id, item); avoidClick($event)" class="lockQuotasIcon"><img ng-src="{{item.locked == true ? lockQuotaImg:unLockQuotaImg}}" alt="lock_quota" class="img-responsive" /></a>
+													</td>
+													<td ng-if="quota[0].qualification_name == 'zipcodes'" class="text-left"><span data-toggle="modal" data-target="#groupZipcodesModal" ng-click="openZipcodesGroupModal(srvQtaMgeDetails.survey_id, item.buyer_ziplist_ref, item.name)"> {{item.name | breakArrayAndJoin}}</span><a ng-click="lockQuota(srvQtaMgeDetails.survey_id, quota[0].qualification_name, item.quota_id, !item.locked, $index, item.id, item); avoidClick($event)" class="lockQuotasIcon"><img ng-src="{{item.locked == true ? lockQuotaImg:unLockQuotaImg}}" alt="lock_quota" class="img-responsive" /></a>
+													</td>
+													<td class="text-center">{{surveyDetails.clickBalance == 1? item.suppliers[0].buyer_valid_clks:item.achieved | number:0}}&nbsp;|&nbsp;{{item.Qty | number:0}}</td>
+													<td class="text-center min-wid-130" ng-if="operator != 'none' || buyer != 'none'">
+														<div click-edit loader="loader.show" type="inputText" ng-model="item" ng-click="avoidClick($event)">
+															{{item.current_target | number:0}}
+														</div>
+													</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{item.locked == true ? 0:item.currently_open | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || supplier != 'none'">{{item.locked == true ? 0:item.locked == true ? 0:item.sup_currently_open | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{surveyDetails.clickBalance == 1? item.achieved : item.suppliers[0].buyer_valid_clks}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{!item.suppliers[0].last_start_date ? "-": item.suppliers[0].last_start_date | date:'MM/dd/yyyy h:mma'}}</td>
+													<td class="text-center">{{!item.suppliers[0].last_complete_date ? "-": item.suppliers[0].last_complete_date | date:'MM/dd/yyyy h:mma'}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{(item.suppliers[0]['complete_fielded'] * 100)/(item.suppliers[0]['buyer_valid_clks'] - item.suppliers[0]['bip']) | suppConversion : item.suppliers[0]['complete_fielded'] != 0 : (item.suppliers[0]['buyer_valid_clks'] - item.suppliers[0]['bip']) != 0}}</td>
+													<td class="text-center" ng-if="!filterCompanyDetail && surveyDetails.clickBalance == 0">{{item.maximum | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{item.buyer_in_progress | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'"><li class="fa fa-chevron-down rotate" ng-class="{'down': showAccordianQuota.current == item.unique_id? true : false}" ng-click="showAccordianQuota.current = item.unique_id; checkExpendStatus($event)"></li></td>
+												</tr>
+
+												<tr class="expandQuota_accordian" ng-if="showAccordianQuota.current == item.unique_id" ng-if="operator != 'none' || buyer != 'none'">
+												<td colspan="{{surveyDetails.clickBalance == 1? '9':'10'}}">
+													<div id="layerd{{item.unique_id}}" class="accordian-body collapse">
+														<tr ng-if="showAccordianQuota.current == item.unique_id" class=" expandQuota_accordian quota_accordianrow" ng-repeat="suppliers in srvSupplierDetails track by $index">
+															<td class="text-left">{{suppliers.name}}
+															</td>
+															<td class="text-center">{{surveyDetails.clickBalance == 1? item.suppliers[suppliers.id].buyer_valid_clks:item.suppliers[suppliers.id].complete_fielded}}&nbsp;|&nbsp;{{item.Qty | number:0}}</td>
+															<td class="text-center min-wid-130">
+																{{item.current_target | number:0}}
+															</td>
+															<td class="text-center">{{item.currently_open | number:0}}</td>
+															<td class="text-center" ng-if="operator != 'none' || supplier != 'none'">{{item.locked == true ? 0:item.locked == true ? 0:item.sup_currently_open | number:0}}</td>
+															<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{surveyDetails.clickBalance == 1? item.suppliers[suppliers.id].complete_fielded : item.suppliers[suppliers.id].buyer_valid_clks}}</td>
+															<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{!item.suppliers[suppliers.id].last_start_date ? "-": item.suppliers[suppliers.id].last_start_date | date:'MM/dd/yyyy h:mma'}}</td>
+															<td class="text-center">{{!item.suppliers[suppliers.id].last_complete_date ? "-": item.suppliers[suppliers.id].last_complete_date | date:'MM/dd/yyyy h:mma'}}</td>
+															<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{(item.suppliers[suppliers.id]['complete_fielded'] * 100)/(item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) | suppConversion : item.suppliers[suppliers.id]['complete_fielded'] != 0 : (item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) != 0}}</td>
+															<td class="text-center" ng-if="!filterCompanyDetail && surveyDetails.clickBalance == 0">{{item.maximum | number:0}}</td>
+															<td class="text-center">{{item.suppliers[suppliers.id]['bip'] | number:0}}</td>
+															<td class="text-center"></td>
+														</tr>
+													</div>
+												</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+									<!--***********Grouped Quota ********-->
+									<div class="surveyDetailsTableWrapper" ng-if="srvQtaMgeDetails.groupedCatQuotas.length && quotaViewFlags.quotaview">
+										<table class="table survey-detail-table" ng-class="{'supplier-dashboard-quotas':filterCompanyDetail}">
+											<thead>
+												<tr>
+												<th class="text-left">Grouped</th>
+												<th class="text-center">{{surveyDetails.clickBalance == 1? "Click Fielded Vs Click Goal":"Fielded Vs Goal"}}</th>
+												<th class="text-center min-wid-130" ng-if="operator != 'none' || buyer != 'none'">
+													<lable>{{surveyDetails.clickBalance == 1? "Clicks Current Target":"Current Target"}}<div class="help-tip">
+														<i class="fa fa-info-circle" aria-hidden="true"></i>
+														<p><span>For Field Management, you can change the Currently Open amount by changing the Current Target. Currently Open = Current Target - Achieved.</span></p>
+													</div> </lable>
+												</th>
+												<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">Currently Open</th>
+												<th class="text-center" ng-if="operator != 'none' || supplier != 'none'">Supplier Currently Open</th>
+												<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{surveyDetails.clickBalance == 1? "Completes":"Valid Clicks"}}</th>
+												<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">Last Start Date</th>
+												<th class="text-center">Last Complete Date</th>
+												<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">Conversion</th>
+												<th class="text-center" ng-if="!filterCompanyDetail && surveyDetails.clickBalance == 0">Max</th>
+												<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">In Progress</th>
+												<th class="text-center" ng-if="operator != 'none' || buyer != 'none'"> </th>
+												</tr>
+											</thead>
+											<tbody ng-repeat="item in srvQtaMgeDetails.groupedCatQuotas track by $index">
+												<tr ng-class="{'quotagroupselected': item.editCurrntTrgtActive == true ?item.editCurrntTrgtActive : item.editCurrntTrgtActive = false,'editmarkcolorchange': checkhover}" ng-click="item.editCurrntTrgtActive = !item.editCurrntTrgtActive; checkGroupLockUnlockQuotaStatus(srvQtaMgeDetails.survey_id, 'grouped', item.unique_id)" ng-mouseenter="checkhover = true" ng-mouseleave="checkhover = false" data-toggle="collapse" data-target="#grouped{{item.unique_id}}" class="accordion-toggle supplier_accordian">
+													<td ng-if="item.qualification_name != 'zipcodes'" class="text-left"><span>{{item.name | breakArrayAndJoin}}</span><a ng-click="lockQuota(srvQtaMgeDetails.survey_id, 'grouped', item.quota_id, !item.locked, $index, item.id, item); avoidClick($event)" class="lockQuotasIcon"><img ng-src="{{item.locked == true ? lockQuotaImg:unLockQuotaImg}}" alt="lock_quota" class="img-responsive" /></a>
+													</td>
+													<td ng-if="item.qualification_name == 'zipcodes'" class="text-left">
+														<span ng-if="item.name.length > 0" data-toggle="modal" data-target="#groupZipcodesModal" ng-click="openZipcodesGroupModal(srvQtaMgeDetails.survey_id, item.buyer_ziplist_ref, item.name)"> {{item.name | breakArrayAndJoin}}</span>
+														<span ng-if="item.name.length == 0" data-toggle="modal" data-target="#groupZipcodesModal" ng-click="openZipcodesGroupModal(srvQtaMgeDetails.survey_id, item.buyer_ziplist_ref, item.name)"> {{item.name | breakArrayAndJoin}}</span><a ng-click="lockQuota(srvQtaMgeDetails.survey_id, 'grouped', item.quota_id, !item.locked, $index, item.id, item); avoidClick($event)" class="lockQuotasIcon"><img ng-src="{{item.locked == true ? lockQuotaImg:unLockQuotaImg}}" alt="lock_quota" class="img-responsive" /></a>
+													</td>
+													<td class="text-center">{{surveyDetails.clickBalance == 1? item.suppliers[0].buyer_valid_clks:item.achieved | number:0}}&nbsp;|&nbsp;{{item.Qty | number:0}}</td>
+													<td class="text-center min-wid-130" ng-if="operator != 'none' || buyer != 'none'">
+														<div click-edit loader="loader.show" type="inputText" ng-model="item" ng-click="avoidClick($event)">
+															{{item.current_target | number:0}}
+														</div>
+													</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{item.locked == true ? 0:item.currently_open | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || supplier != 'none'">{{item.locked == true ? 0:item.locked == true ? 0:item.sup_currently_open | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{surveyDetails.clickBalance == 1? item.achieved : item.suppliers[0].buyer_valid_clks}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{!item.suppliers[0].last_start_date ? "-": item.suppliers[0].last_start_date | date:'MM/dd/yyyy h:mma'}}</td>
+													<td class="text-center">{{!item.suppliers[0].last_complete_date ? "-": item.suppliers[0].last_complete_date | date:'MM/dd/yyyy h:mma'}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{(item.suppliers[0]['complete_fielded'] * 100)/(item.suppliers[0]['buyer_valid_clks'] - item.suppliers[0]['bip']) | suppConversion : item.suppliers[0]['complete_fielded'] != 0 : (item.suppliers[0]['buyer_valid_clks'] - item.suppliers[0]['bip']) != 0}}</td>
+													<td class="text-center" ng-if="!filterCompanyDetail && surveyDetails.clickBalance == 0">{{item.maximum | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{item.buyer_in_progress | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'"><li class="fa fa-chevron-down rotate" ng-class="{'down': showAccordianQuota.current == item.unique_id? true : false}" ng-click="showAccordianQuota.current = item.unique_id; checkExpendStatus($event)"></li></td>
+												</tr>
+												<tr class="expandQuota_accordian" ng-if="showAccordianQuota.current == item.unique_id" ng-if="operator != 'none' || buyer != 'none'">
+													<td colspan="surveyDetails.clickBalance == 1? 9:10">
+													<div id="grouped{{item.unique_id}}" class="accordian-body collapse">
+														<tr ng-if="showAccordianQuota.current == item.unique_id" class="expandQuota_accordian quota_accordianrow" ng-repeat="suppliers in srvSupplierDetails track by $index">
+															<td class="text-left">{{suppliers.name}}
+															</td>
+															<td class="text-center">{{surveyDetails.clickBalance == 1? item.suppliers[suppliers.id].buyer_valid_clks:item.suppliers[suppliers.id].complete_fielded}}&nbsp;|&nbsp;{{item.Qty | number:0}}</td>
+															<td class="text-center min-wid-130">
+																{{item.current_target | number:0}}
+															</td>
+															<td class="text-center">{{item.currently_open | number:0}}</td>
+															<td class="text-center" ng-if="operator != 'none' || supplier != 'none'">{{item.locked == true ? 0:item.locked == true ? 0:item.sup_currently_open | number:0}}</td>
+															<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{surveyDetails.clickBalance == 1? item.suppliers[suppliers.id].complete_fielded : item.suppliers[suppliers.id].buyer_valid_clks}}</td>
+															<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{!item.suppliers[suppliers.id].last_start_date ? "-": item.suppliers[suppliers.id].last_start_date | date:'MM/dd/yyyy h:mma'}}</td>
+															<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{!item.suppliers[suppliers.id].last_complete_date ? "-": item.suppliers[suppliers.id].last_complete_date | date:'MM/dd/yyyy h:mma'}}</td>
+															<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{(item.suppliers[suppliers.id]['complete_fielded'] * 100)/(item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) | suppConversion : item.suppliers[suppliers.id]['complete_fielded'] != 0 : (item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) != 0}}</td>
+															<td class="text-center" ng-if="!filterCompanyDetail && surveyDetails.clickBalance == 0">{{item.maximum | number:0}}</td>
+															<td class="text-center">{{item.suppliers[suppliers.id]['bip'] | number:0}}</td>
+															<td class="text-center"></td>
+
+														</tr>
+													</div>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</div> 
+									<!-- nested quotas -->
+									<div class="surveyDetailsTableWrapper" ng-if="srvQtaMgeDetails.nestedQuotas.length && quotaViewFlags.quotaview">
+										<table class="table survey-detail-table" ng-class="{'supplier-dashboard-quotas':filterCompanyDetail}">
+											<thead>
+												<tr>
+													<th class="text-left">Nested</th>
+													<th class="text-center">{{surveyDetails.clickBalance == 1? "Click Fielded Vs Click Goal":"Fielded Vs Goal"}}</th>
+													<th class="text-center min-wid-130" ng-if="operator != 'none' || buyer != 'none'">
+														<lable>{{surveyDetails.clickBalance == 1? "Clicks Current Target":"Current Target"}}<div class="help-tip">
+															<i class="fa fa-info-circle" aria-hidden="true"></i>
+															<p><span>For Field Management, you can change the Currently Open amount by changing the Current Target. Currently Open = Current Target - Achieved.</span></p>
+														</div> </lable>
+													</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">Currently Open</th>
+													<th class="text-center" ng-if="operator != 'none' || supplier != 'none'">Supplier Currently Open</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{surveyDetails.clickBalance == 1? "Completes":"Valid Clicks"}}</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">Last Start Date</th>
+													<th class="text-center">Last Complete Date</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">Conversion</th>
+													<th class="text-center" ng-if="!filterCompanyDetail && surveyDetails.clickBalance == 0">Max</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">In Progress</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'"> </th>
+												</tr>
+											</thead>
+											<tbody ng-repeat="item in srvQtaMgeDetails.nestedQuotas track by $index">
+												<tr ng-class="{'quotagroupselected': item.editCurrntTrgtActive == true ?item.editCurrntTrgtActive : item.editCurrntTrgtActive = false,'editmarkcolorchange': checkhover}" ng-click="item.editCurrntTrgtActive = !item.editCurrntTrgtActive; checkGroupLockUnlockQuotaStatus(srvQtaMgeDetails.survey_id, 'nested', item.unique_id)" ng-mouseenter="checkhover = true" ng-mouseleave="checkhover = false" data-toggle="collapse" data-target="#nested{{item.unique_id}}" class="accordion-toggle supplier_accordian">
+													<td class="text-left">
+															<span ng-repeat="option in item.combinedOptions track by $index">
+																<span ng-if="option.q_id && option.name && (option.q_id != config.zipcodesQual.id)">{{option.name}}{{$last ? '' : ', '}}</span>
+																<a ng-if="option.q_id && (option.q_id == config.zipcodesQual.id)" data-toggle="modal" data-target="#groupZipcodesModal" ng-click="openZipcodesGroupModal(srvQtaMgeDetails.survey_id, item.buyer_ziplist_ref, item.name)">{{option.name}}{{$last ? '' : ', '}}</a>
+																<span ng-if="!option.name">{{option | convertRangeWithUnits}}{{$last ? '' : ', '}}</span>
+															</span><!--
+
+															{{item.combinedOptions | breakArrayAndJoin}} -->
+													<a ng-click="lockQuota(srvQtaMgeDetails.survey_id, 'nested', item.quota_id, !item.locked, $index, null, item); avoidClick($event)" class="lockQuotasIcon"><img ng-src="{{item.locked == true ? lockQuotaImg:unLockQuotaImg}}" alt="lock_quota" class="img-responsive" /></a>
+													</td>
+													<td class="text-center">{{surveyDetails.clickBalance == 1? item.suppliers[0].buyer_valid_clks:item.achieved | number:0}}&nbsp;|&nbsp;{{item.Qty | number:0}}</td>
+													<td class="text-center min-wid-130" ng-if="operator != 'none' || buyer != 'none'">
+														<div click-edit loader="loader.show" type="inputText" ng-model="item" ng-click="avoidClick($event)">
+															{{item.current_target | number:0}}
+														</div>
+													</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{item.locked == true ? 0:item.currently_open | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || supplier != 'none'">{{item.locked == true ? 0:item.locked == true ? 0:item.sup_currently_open | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{surveyDetails.clickBalance == 1? item.achieved : item.suppliers[0].buyer_valid_clks}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{!item.suppliers[0].last_start_date ? "-": item.suppliers[0].last_start_date | date:'MM/dd/yyyy h:mma'}}</td>
+													<td class="text-center">{{!item.suppliers[0].last_complete_date ? "-": item.suppliers[0].last_complete_date | date:'MM/dd/yyyy h:mma'}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{(item.suppliers[0]['complete_fielded'] * 100)/(item.suppliers[0]['buyer_valid_clks'] - item.suppliers[0]['bip']) | suppConversion : item.suppliers[0]['complete_fielded'] != 0 : (item.suppliers[0]['buyer_valid_clks'] - item.suppliers[0]['bip']) != 0}}</td>
+													<td class="text-center" ng-if="!filterCompanyDetail && surveyDetails.clickBalance == 0">{{item.maximum | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{item.buyer_in_progress | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'"><li class="fa fa-chevron-down rotate" ng-class="{'down': showAccordianQuota.current == item.unique_id? true : false}" ng-click="showAccordianQuota.current = item.unique_id; checkExpendStatus($event)"></li></td>
+												</tr>
+												<tr class="expandQuota_accordian" ng-if="showAccordianQuota.current == item.unique_id" ng-if="operator != 'none' || buyer != 'none'">
+													<td colspan="surveyDetails.clickBalance == 1? 9:10">
+													<div id="nested{{item.unique_id}}" class="accordian-body collapse">
+														<tr ng-if="showAccordianQuota.current == item.unique_id" class="expandQuota_accordian quota_accordianrow" ng-repeat="suppliers in srvSupplierDetails track by $index">
+															<td class="text-left">{{suppliers.name}}
+															</td>
+															<td class="text-center">{{surveyDetails.clickBalance == 1? item.suppliers[suppliers.id].buyer_valid_clks:item.suppliers[suppliers.id].complete_fielded}}&nbsp;|&nbsp;{{item.Qty | number:0}}</td>
+															<td class="text-center min-wid-130">
+																{{item.current_target | number:0}}
+															</td>
+															<td class="text-center">{{item.currently_open | number:0}}</td>
+															<td class="text-center" ng-if="operator != 'none' || supplier != 'none'">{{item.locked == true ? 0:item.locked == true ? 0:item.sup_currently_open | number:0}}</td>
+															<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{surveyDetails.clickBalance == 1? item.suppliers[suppliers.id].complete_fielded : item.suppliers[suppliers.id].buyer_valid_clks}}</td>
+															<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{!item.suppliers[suppliers.id].last_start_date ? "-": item.suppliers[suppliers.id].last_start_date | date:'MM/dd/yyyy h:mma'}}</td>
+															<td class="text-center">{{!item.suppliers[suppliers.id].last_complete_date ? "-": item.suppliers[suppliers.id].last_complete_date | date:'MM/dd/yyyy h:mma'}}</td>
+															<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{(item.suppliers[suppliers.id]['complete_fielded'] * 100)/(item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) | suppConversion : item.suppliers[suppliers.id]['complete_fielded'] != 0 : (item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) != 0}}</td>
+															<td class="text-center" ng-if="!filterCompanyDetail && surveyDetails.clickBalance == 0">{{item.maximum | number:0}}</td>
+															<td class="text-center">{{item.suppliers[suppliers.id]['bip'] | number:0}}</td>
+															<td class="text-center"></td>
+
+														</tr>
+													</div>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+									<!-- advance quotas quotas -->
+									<div class="surveyDetailsTableWrapper" ng-repeat="quota in srvQtaMgeDetails.advanceQuotas track by $index" ng-if="quota.length && quota[0].hasValidQuotas && quotaViewFlags.quotaview">
+										<table class="table survey-detail-table" ng-class="{'supplier-dashboard-quotas':filterCompanyDetail}">
+											<thead>
+												<tr>
+													<!-- PD-1263 Csa to CSBA -->
+													<th class="text-left">{{quota[0].qualification_name | removeUnderscore}}</th>
+													<th class="text-center">{{surveyDetails.clickBalance == 1? "Click Fielded Vs Click Goal":"Fielded Vs Goal"}}</th>
+													<th class="text-center min-wid-130" ng-if="operator != 'none' || buyer != 'none'">
+														<lable>{{surveyDetails.clickBalance == 1? "Clicks Current Target":"Current Target"}}<div class="help-tip">
+															<i class="fa fa-info-circle" aria-hidden="true"></i>
+															<p><span>For Field Management, you can change the Currently Open amount by changing the Current Target. Currently Open = Current Target - Achieved.</span></p>
+														</div> </lable>
+													</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">Currently Open</th>
+													<th class="text-center" ng-if="operator != 'none' || supplier != 'none'">Supplier Currently Open</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{surveyDetails.clickBalance == 1? "Completes":"Valid Clicks"}}</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">Last Start Date</th>
+													<th class="text-center">Last Complete Date</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">Conversion</th>
+													<th class="text-center" ng-if="!filterCompanyDetail && surveyDetails.clickBalance == 0">Max</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">In Progress</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'"> </th>
+												</tr>
+											</thead>
+											<tbody ng-repeat="item in quota track by $index">
+												<tr ng-class="{'quotagroupselected': item.editCurrntTrgtActive == true ?item.editCurrntTrgtActive : item.editCurrntTrgtActive = false, 'editmarkcolorchange': checkhover}" ng-click="item.editCurrntTrgtActive = !item.editCurrntTrgtActive; checkGroupLockUnlockQuotaStatus(srvQtaMgeDetails.survey_id, quota[0].qualification_name, item.unique_id)" ng-mouseenter="checkhover = true" ng-mouseleave="checkhover = false" data-toggle="collapse" data-target="#advance{{item.unique_id}}" class="accordion-toggle supplier_accordian">
+													<td ng-if="quota[0].qualification_name != 'zipcodes'" class="text-left">{{item.name | breakArrayAndJoin}}<a ng-click="lockQuota(srvQtaMgeDetails.survey_id, quota[0].qualification_name, item.quota_id, !item.locked, $index, item.id, item); avoidClick($event)" class="lockQuotasIcon"><img ng-src="{{item.locked == true ? lockQuotaImg:unLockQuotaImg}}" alt="lock_quota" class="img-responsive" /></a>
+													</td>
+													<td ng-if="quota[0].qualification_name == 'zipcodes'" class="text-left"><span data-toggle="modal" data-target="#groupZipcodesModal" ng-click="openZipcodesGroupModal(srvQtaMgeDetails.survey_id, item.buyer_ziplist_ref, item.name)">{{item.name | breakArrayAndJoin}}</span><a ng-click="lockQuota(srvQtaMgeDetails.survey_id, quota[0].qualification_name, item.quota_id, !item.locked, $index, item.id, item); avoidClick($event)" class="lockQuotasIcon"><img ng-src="{{item.locked == true ? lockQuotaImg:unLockQuotaImg}}" alt="lock_quota" class="img-responsive" /></a>
+													</td>
+													<td class="text-center">{{surveyDetails.clickBalance == 1? item.suppliers[0].buyer_valid_clks:item.achieved | number:0}}&nbsp;|&nbsp;{{item.Qty | number:0}}</td>
+													<td class="text-center min-wid-130" ng-if="operator != 'none' || buyer != 'none'">
+														<div click-edit loader="loader.show" type="inputText" ng-model="item" ng-click="avoidClick($event)">
+															{{item.current_target | number:0}}
+														</div>
+													</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{item.locked == true ? 0:item.currently_open | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || supplier != 'none'">{{item.locked == true ? 0:item.locked == true ? 0:item.sup_currently_open | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{surveyDetails.clickBalance == 1? item.achieved : item.suppliers[0].buyer_valid_clks}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{!item.suppliers[0].last_start_date ? "-": item.suppliers[0].last_start_date | date:'MM/dd/yyyy h:mma'}}</td>
+													<td class="text-center">{{!item.suppliers[0].last_complete_date ? "-": item.suppliers[0].last_complete_date | date:'MM/dd/yyyy h:mma'}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{(item.suppliers[0]['complete_fielded'] * 100)/(item.suppliers[0]['buyer_valid_clks'] - item.suppliers[0]['bip']) | suppConversion : item.suppliers[0]['complete_fielded'] != 0 : (item.suppliers[0]['buyer_valid_clks'] - item.suppliers[0]['bip']) != 0}}</td>
+													<td class="text-center" ng-if="!filterCompanyDetail && surveyDetails.clickBalance == 0">{{item.maximum | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{item.buyer_in_progress | number:0}}</td>
+													<td class="text-center" ng-if="operator != 'none' || buyer != 'none'"><li class="fa fa-chevron-down rotate" ng-class="{'down': showAccordianQuota.current == item.unique_id? true : false}" ng-click="showAccordianQuota.current = item.unique_id; checkExpendStatus($event)"></li></td>
+												</tr>
+												<tr class="expandQuota_accordian" ng-if="showAccordianQuota.current == item.unique_id" ng-if="operator != 'none' || buyer != 'none'">
+													<td colspan="surveyDetails.clickBalance == 1? 9:10">
+														<div id="advance{{item.unique_id}}" class="accordian-body collapse">
+															<tr ng-if="showAccordianQuota.current == item.unique_id" class="expandQuota_accordian quota_accordianrow" ng-repeat="suppliers in srvSupplierDetails track by $index">
+																<td class="text-left">{{suppliers.name}}
+																</td>
+																<td class="text-center">{{surveyDetails.clickBalance == 1? item.suppliers[suppliers.id].buyer_valid_clks:item.suppliers[suppliers.id].complete_fielded}}&nbsp;|&nbsp;{{item.Qty | number:0}}</td>
+																<td class="text-center min-wid-130">
+																	{{item.current_target | number:0}}
+																</td>
+																<td class="text-center">{{item.currently_open | number:0}}</td>
+																<td class="text-center" ng-if="operator != 'none' || supplier != 'none'">{{item.locked == true ? 0:item.locked == true ? 0:item.sup_currently_open | number:0}}</td>
+																<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{surveyDetails.clickBalance == 1? item.suppliers[suppliers.id].complete_fielded : item.suppliers[suppliers.id].buyer_valid_clks}}</td>
+																<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{!item.suppliers[suppliers.id].last_start_date ? "-": item.suppliers[suppliers.id].last_start_date | date:'MM/dd/yyyy h:mma'}}</td>
+																<td class="text-center">{{!item.suppliers[suppliers.id].last_complete_date ? "-": item.suppliers[suppliers.id].last_complete_date | date:'MM/dd/yyyy h:mma'}}</td>
+																<td class="text-center" ng-if="operator != 'none' || buyer != 'none'">{{(item.suppliers[suppliers.id]['complete_fielded'] * 100)/(item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) | suppConversion : item.suppliers[suppliers.id]['complete_fielded'] != 0 : (item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) != 0}}</td>
+																<td class="text-center" ng-if="!filterCompanyDetail && surveyDetails.clickBalance == 0">{{item.maximum | number:0}}</td>
+																<td class="text-center">{{item.suppliers[suppliers.id]['bip'] | number:0}}</td>
+																<td class="text-center"></td>
+															</tr>
+														</div>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+
+					<div ng-if="quotaViewFlags.supplierview" class="quotaBySupplier">
+						<table class="table survey-detail-table" ng-class="{'supplier-dashboard-quotas':filterCompanyDetail}">
+							<thead>
+							<tr>
+								<th class="text-left">&nbsp;</th>
+								<th class="text-center">Fielded | Goal</th>
+								<th class="text-center">Current Target</th>
+								<th class="text-center"> Currently Open</th>
+								<th class="text-center">Valid Clicks</th>
+								<th class="text-center">Last Start Date</th>
+								<th class="text-center">Last Complete Date</th>
+								<th class="text-center"> In Progress</th>
+								<th class="text-center ">Conversion</th>
+								<th class="text-center">&nbsp;</th>
+							</tr>
+
+							</thead>
+							<tbody ng-repeat="suppliers in srvSupplierDetails track by $index">
+							<tr data-toggle="collapse" data-target="#{{$index}}" class="accordion-toggle supplier_accordian">
+								<td class="text-left" ng-click="avoidClick($event)">{{suppliers.name}}</td>
+								<td class="text-center" ng-click="avoidClick($event)">{{suppliers.fielded == undefined ? 0: (suppliers.fielded | number:0)}}&nbsp;|&nbsp;{{suppliers.quantity | number:0}}</td>
+								<td class="text-center" ng-click="avoidClick($event)">-</td>
+								<td class="text-center" ng-click="avoidClick($event)">-</td>
+								<td class="text-center" ng-click="avoidClick($event)">-</td>
+								<td class="text-center" ng-click="avoidClick($event)">{{!suppliers.last_start_date ? "-": suppliers.last_start_date | date:'MM/dd/yyyy h:mma'}}</td>
+								<td class="text-center" ng-click="avoidClick($event)">{{!suppliers.last_complete_date ? "-": suppliers.last_complete_date | date:'MM/dd/yyyy h:mma'}}</td>
+								<td class="text-center" ng-if="supplier != 'none'" ng-click="avoidClick($event)"></td>
+								<td class="text-center" ng-click="avoidClick($event)">{{suppliers.buyer_in_progress | number:0}}</td>
+								<td class="text-center">&nbsp;</td>
+								<td class="text-center" ng-click="trCollpse = !trCollpse"><li class="fa fa-chevron-down rotate" ng-class="{'down': trCollpse == true? true : false}"></li></td>
+							</tr>
+							<tr class="expandQuota_accordian" ng-if="trCollpse">
+								<td colspan="10" style="padding:0px!important;">
+									<div id="{{$index}}" class="accordian-body collapse">
+										<table ng-repeat="quota in srvQtaMgeDetails.quotas track by $index">
+											<thead>
+											<tr>
+												<th class="text-left">{{quota[0].qualification_name == "csa" ? "CSBA" : quota[0].qualification_name}}</th>
+
+												<th class="text-center">&nbsp;</th>
+												<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">&nbsp;</th>
+												<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">&nbsp;</th>
+												<th class="text-center">&nbsp;</th>
+												<th class="text-center" ng-if="!filterCompanyDetail">&nbsp;</th>
+												<th class="text-center" ng-if="operator != 'none' || supplier != 'none'">&nbsp;</th>
+												<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">&nbsp;</th>
+
+												<th class="text-center">&nbsp;</th>
+
+											</tr>
+											</thead>
+											<tbody>
+											<tr ng-repeat="item in quota track by $index" >
+												<td ng-if="quota[0].qualification_name != 'zipcodes'" class="text-left ">{{item.name | breakArrayAndJoin}}
+
+												</td>
+												<td ng-if="quota[0].qualification_name == 'zipcodes'" class="text-left "><span data-toggle="modal" data-target="#groupZipcodesModal" ng-click="openZipcodesGroupModal(srvQtaMgeDetails.survey_id, item.buyer_ziplist_ref, item.name)"> {{item.name | breakArrayAndJoin}}</span>
+												</td>
+
+												<td class="text-center">
+													{{item.suppliers[suppliers.id]['complete_fielded'] || 0}}&nbsp;|&nbsp;
+													{{item.suppliers[suppliers.id]['complete_needed'] || 0}}</td>
+												<td class="text-center">{{item.suppliers[suppliers.id]['current_target'] || 0}}</td>
+                                                <td class="text-center">{{item.locked == true ? 0 : item.suppliers[suppliers.id]['currently_open'] || 0}}</td>
+												<td class="text-center">
+													{{item.suppliers[suppliers.id]['buyer_valid_clks'] || 0}}</td>
+												<td class="text-center">
+													{{!item.suppliers[suppliers.id].last_start_date ? "-": item.suppliers[suppliers.id].last_start_date | date:'MM/dd/yyyy h:mma'}}
+												</td>
+												<td class="text-center">
+													{{!item.suppliers[suppliers.id].last_complete_date ? "-": item.suppliers[suppliers.id].last_complete_date | date:'MM/dd/yyyy h:mma'}}
+												</td>
+												<td class="text-center">{{item.suppliers[suppliers.id]['bip'] || 0}}</td>
+												<td class="text-center">{{(item.suppliers[suppliers.id]['complete_fielded'] * 100)/(item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) | suppConversion : item.suppliers[suppliers.id]['complete_fielded'] != 0 : (item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) != 0}}</td>
+												<td class="text-center">&nbsp;</td>
+
+											</tr>
+											</tbody>
+										</table>
+										<!-- Nested Quota -->
+										<div ng-if="srvQtaMgeDetails.nestedQuotas.length && nestedQuotasQualName.length"><br><br>
+											<b>NESTED &nbsp;&nbsp;&nbsp;</b>
+											<div class="btn-group">
+												<label ng-repeat="buttonName in nestedQuotasQualName track by $index" class="btn btn-primary nested_group" ng-click="filterNestedQuotaByQualification(buttonName)" ng-class="{active_nestedbutton: buttonName.quotaname === defaultActiveNestedBtn}">{{buttonName.quotaname | capitalize}}</label>
+											</div>
+											<table>
+												<thead>
+												<tr>
+													<th class="text-left">&nbsp;</th>
+													<th class="text-center">&nbsp;</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">
+
+													</th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'"></th>
+													<th class="text-center"></th>
+													<th class="text-center" ng-if="!filterCompanyDetail"></th>
+													<th class="text-center" ng-if="operator != 'none' || supplier != 'none'"></th>
+													<th class="text-center" ng-if="operator != 'none' || buyer != 'none'"></th>
+													<th class="text-center">&nbsp;</th>
+												</tr>
+
+												</thead>
+												<tbody>
+												<tr class="expandQuota_accordian" ng-if="trCollpse" ng-repeat="item in srvQtaMgeDetails.nestedQuotas track by $index">
+													<td class="text-left supplierview_indent">
+														<span ng-repeat="option in item.combinedOptions track by $index">
+															<span ng-if="option.q_id && option.name && (option.q_id != config.zipcodesQual.id)">{{option.name}}{{$last ? '' : ', '}}</span>
+															<a ng-if="option.q_id && (option.q_id == config.zipcodesQual.id)" data-toggle="modal" data-target="#groupZipcodesModal" ng-click="openZipcodesGroupModal(srvQtaMgeDetails.survey_id, item.buyer_ziplist_ref, item.name)"> {{option.name}}{{$last ? '' : ', '}}</a>
+															<span ng-if="!option.name">{{option | convertRangeWithUnits}}{{$last ? '' : ', '}}</span>
+														</span>
+
+													</td>
+													<td class="text-center">
+														{{item.suppliers[suppliers.id]['complete_fielded'] || 0}}&nbsp;|&nbsp;
+														{{item.suppliers[suppliers.id]['complete_needed'] || 0}}</td>
+													<td class="text-center">{{item.suppliers[suppliers.id]['current_target'] || 0}}</td>
+                                                	<td class="text-center">{{item.locked == true ? 0 : item.suppliers[suppliers.id]['currently_open'] || 0}}</td>
+													<td class="text-center">
+														{{item.suppliers[suppliers.id]['buyer_valid_clks'] || 0}}</td>
+													<td class="text-center">
+														{{!item.suppliers[suppliers.id].last_start_date ? "-": item.suppliers[suppliers.id].last_start_date | date:'MM/dd/yyyy h:mma'}}
+													</td>
+													<td class="text-center">
+														{{!item.suppliers[suppliers.id].last_complete_date ? "-": item.suppliers[suppliers.id].last_complete_date | date:'MM/dd/yyyy h:mma'}}
+													</td>
+													<td class="text-center">{{item.suppliers[suppliers.id]['bip'] || 0}}</td>
+													<td class="text-center">{{(item.suppliers[suppliers.id]['complete_fielded'] * 100)/(item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) | suppConversion : item.suppliers[suppliers.id]['complete_fielded'] != 0 : (item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) != 0}}</td>
+													<td class="text-center">&nbsp;</td>
+												</tr>
+												</tbody>
+											</table>
+										</div>
+
+										<!-- Advanced Quota -->
+										<table ng-repeat="quota in srvQtaMgeDetails.advanceQuotas track by $index" ng-if="quota.length && quota[0].hasValidQuotas">
+											<thead>
+											<tr>
+												<!-- PD-1263 Csa to CSBA -->
+												<th class="text-left supplierview_indent">{{quota[0].qualification_name == "csa" ? "CSBA" : quota[0].qualification_name}}</th>
+
+												<th class="text-center"></th>
+												<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">
+												</th>
+												<th class="text-center" ng-if="operator != 'none' || buyer != 'none'"></th>
+												<th class="text-center"></th>
+												<th class="text-center" ng-if="!filterCompanyDetail"></th>
+												<th class="text-center" ng-if="operator != 'none' || supplier != 'none'"></th>
+												<th class="text-center" ng-if="operator != 'none' || buyer != 'none'"></th>
+												<th class="text-center">&nbsp;</th>
+											</tr>
+											</thead>
+											<tbody>
+											<tr ng-repeat="item in quota track by $index">
+												<td ng-if="quota[0].qualification_name != 'zipcodes'" class="text-left supplierview_indent">{{item.name | breakArrayAndJoin}}
+												</td>
+
+												<td ng-if="quota[0].qualification_name == 'zipcodes'" class="text-left supplierview_indent"><span data-toggle="modal" data-target="#groupZipcodesModal" ng-click="openZipcodesGroupModal(srvQtaMgeDetails.survey_id, item.buyer_ziplist_ref,  item.name)"> {{item.name | breakArrayAndJoin}}</span>
+												</td>
+
+												<td class="text-center">
+													{{item.suppliers[suppliers.id]['complete_fielded'] || 0}}&nbsp;|&nbsp;
+													{{item.suppliers[suppliers.id]['complete_needed'] || 0}}</td>
+												<td class="text-center">{{item.suppliers[suppliers.id]['current_target'] || 0}}</td>
+                                                <td class="text-center">{{item.locked == true ? 0 : item.suppliers[suppliers.id]['currently_open'] || 0}}</td>
+												<td class="text-center">
+													{{item.suppliers[suppliers.id]['buyer_valid_clks'] || 0}}</td>
+												<td class="text-center">
+													{{!item.suppliers[suppliers.id].last_start_date ? "-": item.suppliers[suppliers.id].last_start_date | date:'MM/dd/yyyy h:mma'}}
+												</td>
+												<td class="text-center">
+													{{!item.suppliers[suppliers.id].last_complete_date ? "-": item.suppliers[suppliers.id].last_complete_date | date:'MM/dd/yyyy h:mma'}}
+												</td>
+												<td class="text-center">{{item.suppliers[suppliers.id]['bip'] || 0}}</td>
+												<td class="text-center">{{(item.suppliers[suppliers.id]['complete_fielded'] * 100)/(item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) | suppConversion : item.suppliers[suppliers.id]['complete_fielded'] != 0 : (item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) != 0}}</td>
+												<td class="text-center">&nbsp;</td>
+											</tr>
+											</tbody>
+										</table>
+
+										<!-- Grouped Quota -->
+										<table ng-if="srvQtaMgeDetails.groupedCatQuotas.length">
+											<thead>
+											<tr>
+												<!-- PD-1263 Csa to CSBA -->
+												<th class="text-left supplierview_indent">Grouped</th>
+
+												<th class="text-center"></th>
+												<th class="text-center" ng-if="operator != 'none' || buyer != 'none'">
+												</th>
+												<th class="text-center" ng-if="operator != 'none' || buyer != 'none'"></th>
+												<th class="text-center"></th>
+												<th class="text-center" ng-if="!filterCompanyDetail"></th>
+												<th class="text-center" ng-if="operator != 'none' || supplier != 'none'"></th>
+												<th class="text-center" ng-if="operator != 'none' || buyer != 'none'"></th>
+												<th class="text-center">&nbsp;</th>
+											</tr>
+											</thead>
+											<tbody>
+											<tr ng-repeat="item in srvQtaMgeDetails.groupedCatQuotas track by $index">
+												<td ng-if="item.qualification_name != 'zipcodes'" class="text-left supplierview_indent">{{item.name | breakArrayAndJoin}}
+												</td>
+
+												<td ng-if="item.qualification_name == 'zipcodes'" class="text-left supplierview_indent"><span ng-if="item.name.length > 0" data-toggle="modal" data-target="#groupZipcodesModal" ng-click="openZipcodesGroupModal(srvQtaMgeDetails.survey_id, item.buyer_ziplist_ref, item.name)"> {{item.name | breakArrayAndJoin}}</span>
+												<span ng-if="item.name.length == 0" data-toggle="modal" data-target="#groupZipcodesModal" ng-click="openZipcodesGroupModal(srvQtaMgeDetails.survey_id, item.buyer_ziplist_ref, item.name)"> {{item.name | breakArrayAndJoin}}</span>
+												</td>
+												
+												<td class="text-center">
+													{{item.suppliers[suppliers.id]['complete_fielded'] || 0}}&nbsp;|&nbsp;
+													{{item.suppliers[suppliers.id]['complete_needed'] || 0}}</td>
+												<td class="text-center">{{item.suppliers[suppliers.id]['current_target'] || 0}}</td>
+												<td class="text-center">{{item.locked == true ? 0 : item.suppliers[suppliers.id]['currently_open'] || 0}}</td>
+												<td class="text-center">
+													{{item.suppliers[suppliers.id]['buyer_valid_clks'] || 0}}</td>
+												<td class="text-center">
+													{{!item.suppliers[suppliers.id].last_start_date ? "-": item.suppliers[suppliers.id].last_start_date | date:'MM/dd/yyyy h:mma'}}
+												</td>
+												<td class="text-center">
+													{{!item.suppliers[suppliers.id].last_complete_date ? "-": item.suppliers[suppliers.id].last_complete_date | date:'MM/dd/yyyy h:mma'}}
+												</td>
+												<td class="text-center">{{item.suppliers[suppliers.id]['bip'] || 0}}</td>
+												<td class="text-center">{{(item.suppliers[suppliers.id]['complete_fielded'] * 100)/(item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) | suppConversion : item.suppliers[suppliers.id]['complete_fielded'] != 0 : (item.suppliers[suppliers.id]['buyer_valid_clks'] - item.suppliers[suppliers.id]['bip']) != 0}}</td>
+												<td class="text-center">&nbsp;</td>
+											</tr>
+											</tbody>
+										</table>
+									</div>
+								</td>
+							</tr>
+							</tbody>
+						</table>
+					</div>
+					<!-- PD-1261 End -->
+				</div>
+			</div>
+			<!-- End PD-821 direct edit currently open -->
+			<div id="audience" ng-show="isSet('audience')">
+				<div class="audience-inner">
+					<table class="table survey-detail-table">
+						<tbody>
+							<tr ng-repeat="(qualKey, srvAudienceDetail) in srvAudienceDetails" ng-if="srvAudienceDetail.data">
+								<td>{{qualKey | splitAndJoinBy:'_':' '}} <span class="hasAud" ng-if="srvAudienceDetail.isQuotaSet">Has Quotas</span></td>
+								<td class="text-left" ng-if="!srvAudienceDetail.isRangeType && qualKey != 'Location'">
+									<span ng-repeat="qualObj in srvAudienceDetail.data track by $index" ng-if="!srvAudienceDetail.isAllSet">{{qualObj.name}}{{$last ? '' : ',&nbsp;'}}</span>
+									<span ng-if="srvAudienceDetail.isAllSet">All</span>
+								</td>
+								<td class="text-left" ng-if="srvAudienceDetail.isRangeType  && qualKey != 'Location'">
+									<span ng-repeat="rangeQualObj in srvAudienceDetail.data track by $index">    <span ng-if="qualKey == 'houseHoldIncome' || qualKey == 'Household Income'">
+											{{rangeQualObj.units | rangeCharUnit}}{{rangeQualObj.mn | number:0}}&nbsp;-&nbsp;{{rangeQualObj.units | rangeCharUnit}}{{rangeQualObj.mx | number:0}}<br/>
+										</span>
+										<span ng-if="qualKey != 'houseHoldIncome' && qualKey != 'Household Income'">
+											{{rangeQualObj.mn | number:0}} {{rangeQualObj.units | rangeCharUnit}}&nbsp;-&nbsp;{{rangeQualObj.mx | number:0}} {{rangeQualObj.units | rangeCharUnit}}<br/>
+										</span>
+									</span>
+								</td>
+								<td class="text-left" ng-if="qualKey == 'Location'">
+
+									<p ng-if="srvAudienceDetail.data.length == 0 && srvAudienceDetail.isAllSet">All</span></p>
+
+									<p ng-if="srvAudienceDetail.data.length > 0 && srvAudienceDetail.key != 'zipcodes'"><span ng-bind="getLocName(srvAudienceDetail.key)"></span><span ng-if="srvAudienceDetail.data.length > 1">(s)</span>&nbsp;-&nbsp;<span ng-repeat="regionAudQuotas in srvAudienceDetail.data track by $index">{{regionAudQuotas.name}}{{$last ? '' : ',&nbsp;'}}</span></p>
+
+									<p ng-if="srvAudienceDetail.key == 'zipcodes'">Zipcodes&nbsp;-&nbsp;<button style="font-size: 10px;background: #31b2f1;border: none;" class="btn btn-primary" ng-click="showZipCodes(srvAudienceDetails.survey_id)"><span>View Zipcodes</span></button><br/></p>
+
+								</td>
+							</tr>
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div id="suppliers"  ng-if="supplier == 'none'" ng-show="isSet('suppliers')">
+				<div class="audience-inner">
+					<table class="table survey-detail-table" style="border-collapse:collapse;">
+						<thead>
+						<tr>
+							<th class="text-left">Name</th>
+							<th class="text-center">Intent</th> <!-- PD-683 -->
+							<th class="text-center">Cpi</th>
+							<th class="text-center">Remaining</th>
+							<th class="text-center">{{surveyDetails.clickBalance == 1? "Click Fielded Vs Click Goal":"Fielded Vs Goal"}}</th>
+							<th ng-if="operator != 'none' || buyer != 'none'" class="text-center">Survey Starts</th>
+							<th ng-if="operator != 'none' || buyer != 'none'" class="text-center">Last Survey Start</th>
+							<th ng-if="operator != 'none' || buyer != 'none'" class="text-center">In Progress</th>
+							<th ng-if="operator != 'none' || enableAccordianMenu" class="text-center"></th>
+						</tr>
+						</thead>
+
+						<tbody ng-repeat="suppliers in srvSupplierDetails track by $index">
+						<tr data-toggle="collapse" data-target="#collps{{$index}}" class="accordion-toggle supplier_accordian" ng-click="trCollpse = !trCollpse">
+							<td class="text-left">{{suppliers.name}}</td>
+							<!-- PD-683 -->
+							<td class="text-center">
+												<span id="intent_xicon" ng-if="suppliers.intent_count == 0 || suppliers.intent_count < 0">    <i class="fa fa-times" aria-hidden="true"></i>
+												</span>
+
+								<span id="intent_chkicon" ng-if="suppliers.intent_count > 0">
+													<i class="fa fa-check" aria-hidden="true"></i>
+												</span>
+
+								<span id="intent_quetnicon" ng-if="suppliers.intent_count == undefined">
+													<i class="fa fa-question" aria-hidden="true"></i>
+												</span>
+							</td>
+
+							<td class="text-center">{{suppliers.dashboard_sup_cpi | currency: suppliers.currency_symbol}}</td>
+							<td class="text-center">{{suppliers.remaining == undefined ? 0: (suppliers.remaining | number:0)}}</td>
+							<td class="text-center">{{suppliers.fielded == undefined ? 0: (suppliers.fielded | number:0)}}&nbsp;|&nbsp;{{suppliers.quantity | number:0}}</td>
+							<td ng-if="operator != 'none' || buyer != 'none'" class="text-center">{{suppliers.srvStrtCount}}</td>
+							<td ng-if="operator != 'none' || buyer != 'none'" class="text-center">{{suppliers.lastSrvDate == undefined || suppliers.lastSrvDate == '' ? '--' : suppliers.lastSrvDate | date:'MM/dd/yyyy h:mma'}}</td>
+							<td ng-if="operator != 'none' || buyer != 'none'" class="text-center">{{suppliers.buyer_in_progress}}</td>
+							<td ng-if="operator != 'none' || enableAccordianMenu" class="text-center"><li class="fa fa-chevron-down rotate" ng-class="{'down': trCollpse == true? true : false}"></li></td>
+						</tr>
+						<tr ng-show="trCollpse" ng-if="operator != 'none' || enableAccordianMenu" style="background-color: #f7f3f3 !important;">
+							<td colspan="9"><div id="collps{{$index}}" class="accordian-body collapse">
+								<table>
+									<thead>
+									<tr>
+										<th></th>
+										<th class="text-center" ng-if="suppliers.performance">Total</th>
+										<th></th>
+										<th></th>
+										<th ng-if="suppliers.performance" class="text-center">% of Supplier Total&nbsp; &nbsp;</th>
+										<th>&nbsp; &nbsp;&nbsp; &nbsp;</th>
+										<th ng-if="suppliers.performance" class="text-center">Supplier's Share of Status</th>
+									</tr>
+									</thead>
+									<tbody>
+									<tr ng-repeat="supplrPerfmnc in suppliers.performance track by $index">
+										<td style="left: 80px;">{{supplrPerfmnc._id}}</td>
+										<td class="text-center">{{supplrPerfmnc.count}}</td>
+										<td class="text-center"></td>
+										<td class="text-center"></td>
+										<td class="text-center">{{supplrPerfmnc.perOfSupplrTotl}}</td>
+										<td></td>
+										<td class="text-center">{{supplrPerfmnc.supplier_share_status}}</td>
+									</tr>
+									<tr ng-if="suppliers.perOfSupplrTotl">
+										<td style="left: 80px;">% of Supplier Total</td>
+										<td class="text-center">{{suppliers.perOfSupplrTotl}}</td>
+									</tr>
+									<tr ng-if="suppliers.supplier_share_status">
+										<td style="left: 80px;">Supplier's Share of Status</td>
+										<td class="text-center">{{suppliers.supplier_share_status}}</td>
+									</tr>
+									<tr ng-if="suppliers.valid_click">
+										<td style="left: 80px;">Valid Clicks</td>
+										<td class="text-center">{{suppliers.valid_click ? suppliers.valid_click : 0}}({{suppliers.valid_click_per ? suppliers.valid_click_per : 0}}%)</td>
+										<td>&nbsp; &nbsp; </td>
+										<td class="text-center">${{suppliers.valid_click_cost ? suppliers.valid_click_cost : 0}}</td>
+										<td></td>
+										<td></td>
+									</tr>
+									<tr ng-if="suppliers.srvStrtCount">
+										<td style="left: 80px;">Total Clicks</td>
+										<td class="text-center">{{suppliers.srvStrtCount}}</td>
+										<td>&nbsp; &nbsp; </td>
+										<td class="text-center">${{suppliers.total_click_cost ? suppliers.total_click_cost : 0}}</td>
+										<td></td>
+										<td></td>
+									</tr>
+									</tbody>
+								</table>
+							</div></td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div  id="linkdetail_suppliers" ng-if="filterCompanyDetail" ng-show="isSet('linkdetail_suppliers')">
+
+				<div class="audience-inner">
+					<table class="table survey-detail-table">
+						<tbody>
+						<tr>
+							<td>Survey ID</td>
+							<td>{{surveyDetails.id}}</td>
+						</tr>
+						<tr>
+							<td>Country</td>
+							<td>{{surveyDetails.countryName}}</td>
+						</tr>
+						<tr>
+							<td>Language</td>
+							<td>{{surveyDetails.locale.languageName}}</td>
+						</tr>
+						<tr>
+							<td>Field Date Info</td>
+							<td><strong>Start Date </strong>- {{surveyDetails.creation_date | date:"yyyy/MM/dd"}}&nbsp; <strong>End Date</strong> - {{surveyDetails.End_Date | date:"yyyy/MM/dd"}} &nbsp; <strong>Days in field </strong>- {{surveyDetails.Days_in_Field}}&nbsp;<strong> Days Remaining </strong> - {{surveyDetails.Days_Remaining}} </td>
+						</tr>
+						<tr ng-if="surveyDetails.sr_launchTS">
+							<td>Survey Open/Close Date Info</td>
+							<td><strong>Launch Date </strong>- {{surveyDetails.sr_launchTS }} ,&nbsp; <strong> Close Date - </strong> {{surveyDetails.sr_closeTS || 'NA'}} ,&nbsp; <strong ng-if="surveyDetails.openDates"> Days - </strong> {{surveyDetails.openDates.d}} </strong>,&nbsp; <strong ng-if="surveyDetails.openDates"> Hours - </strong>{{surveyDetails.openDates.h}} ,&nbsp; <strong ng-if="surveyDetails.openDates"> Minutes - </strong>{{surveyDetails.openDates.m}},&nbsp; <strong ng-if="surveyDetails.openDates"> Total Minutes - </strong>{{surveyDetails.openDates.tm}}</td>
+						</tr>
+
+
+
+						<tr ng-if="operatorFlg" >
+							<td>User Name</td>
+							<td>{{srvMgeDetails.buyerCompany}}</td>
+						</tr>
+						<tr ng-if="operatorFlg" >
+							<td>User Email</td>
+							<td>{{srvMgeDetails.buyer_emailAddr}}</td>
+						</tr>
+						<tr>
+							<td>Survey Category</td>
+							<td>{{surveyDetails.samplesName }}</td>
+						</tr>
+						<tr>
+							<td>Category Exclusion</td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td>Include/Exclude</td>
+							<td ng-if ="surveyDetails.incl_excl == 0">Exclude</td>
+							<td ng-if ="surveyDetails.incl_excl == 1">Include</td>
+						</tr>
+						<tr>
+							<td>Survey Exclusion</td>
+							<td>{{surveyDetails.survey_grouping}}</td>
+						</tr>
+						<tr ng-if="supplier != 'none' || operator != 'none' ">
+							<td>Survey Live Entry Link</td>
+							<td><a target="_blank" href="{{suppEntryLink}}">{{suppEntryLink}}</a></td>
+						</tr>
+						<tr ng-if="operator == 'none'">
+							<td>Survey Test Entry Link</td>
+							<td><a target="_blank" href="{{suppTestEntryLink}}">{{suppTestEntryLink}}</a></td>
+						</tr>
+						<tr ng-if="supplier != 'none'">
+							<td>Complete Redirect</td>
+							<td>{{suppSetObj.supp_url_completes}}</td>
+						</tr>
+						<tr ng-if="supplier != 'none'">
+							<td>Term Redirect</td>
+							<td>{{suppSetObj.supp_url_terms}}</td>
+						</tr>
+						<tr ng-if="supplier != 'none'">
+							<td>Overquota Redirect</td>
+							<td>{{suppSetObj.supp_url_overquota}}</td>
+						</tr>
+						<tr ng-if="supplier == 'none' && operator == 'none'">
+							<td>Billing PO/Project Number</td><!-- PD-1254 -->
+							<td>{{surveyDetails.survey_po}}</td>
+						</tr>
+						<tr ng-if="supplier == 'none' && operator == 'none'">
+							<td>Billing External Id</td>
+							<td>{{surveyDetails.survey_external_id}}</td>
+						</tr>
+						<tr ng-if="buyer != 'none' || operator != 'none' ">
+							<td>Client</td>
+							<td>{{surveyDetails.survey_client}}</td>
+						</tr>
+						<tr>
+							<td>Buyer Message</td>
+							<td>{{surveyDetails.buyerMsg}}</td>
+						</tr>
+						<tr ng-if="operator == 'admin' ">
+							<td>Force Block Creation</td>
+							<td><a target="_blank" href="" data-toggle="modal" data-target="#blockCreationModel">Create New Price Block</a></td>
+						</tr>
+						<tr ng-if="operator === 'admin' && surveyDetails.sb_project_id ">
+							<td>Swabucks Project Id</td>
+							<td>{{surveyDetails.sb_project_id}}</td>
+						</tr>
+						<tr ng-if="operator === 'admin' && surveyDetails.offerId ">
+							<td>Lsr's OfferId</td>
+							<td>{{surveyDetails.offerId}}</td>
+						</tr>
+
+						<tr ng-if="operator === 'admin' && surveyDetails.termId ">
+							<td>Lsr's TermId</td>
+							<td>{{surveyDetails.termId}}</td>
+						</tr>
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<!-- Reports tab  -->
+			<div  id="reports" ng-show="isSet('reports')">
+				<div class="reports-inner">
+					<br/><br/>
+					<button type="button" class="btn btn-default" ng-click="downloadSurveyReport(surveyDetails.id)" ng-disabled="repDownloadButton">Download Report</button>
+
+				</div>
+			</div>
+
+			<!-- Activity Logs tab -->
+			<div  id="activityLogs" ng-show="isSet('activityLogs')">
+				<div ng-if="operator == 'admin'">
+				   <div class="activity-ul" ng-if="!showActivtityInputBox"><button class="btn btn-info" ng-click="addActivityNotes()">Add Note</button></div>
+				   <div class="activity-ul" ng-if="showActivtityInputBox">
+					   <textarea class="activity-textarea" ng-model="activityNote" placeholder="Enter your note here..."></textarea>
+					   <button class="btn btn-info text-right" ng-click = "saveAcitivityNotes(surveyDetails.id, activityNote)">Submit</button>
+					   <button class="btn btn-danger text-right" ng-click = "cancelAcitivityNotes(surveyDetails.id, activityNote)">Cancel</button>
+				    </div>
+			    </div>
+				<div class="reports-inner">
+					<br/><br/>
+					<ul class="activity-ul">
+						<li ng-show="isExist" ng-repeat="activity in showActivities track by $index">
+							<!-- <a href="" data-toggle="modal" data-target="#activityLogModal" ng-click="getActivityDetails(surveyDetails.id, activities.length-$index)"> -->
+							<label>{{activity.activityString}}</label>
+							{{activity.timeString}}<!-- </a> -->
+						</li>
+						<li ng-hide="isExist">No activity found.</li>
+					</ul>
+
+				</div>
+			</div>
+			<!-- End here   -->
+			
+			<div id="linkdetail_buyer" ng-if="!filterCompanyDetail" ng-show="isSet('linkdetail_buyer')">
+				<div class="audience-inner">
+					<table class="table survey-detail-table">
+						<tbody>
+						<tr>
+							<td>Survey ID</td>
+							<td>{{surveyDetails.id}}</td>
+						</tr>
+						<tr>
+							<td>Country</td>
+							<td>{{surveyDetails.locale.countryName}}</td>
+						</tr>
+						<tr>
+							<td>Language</td>
+							<td>
+								{{surveyDetails.locale.languageName}}
+							</td>
+						</tr>
+						<tr>
+							<td>Field Date Info</td>
+							<td><strong>Start Date </strong>- {{surveyDetails.creation_date | date: "yyyy/MM/dd"}}&nbsp; <strong>End Date</strong> - {{surveyDetails.End_Date | date: "yyyy/MM/dd"}} &nbsp; <strong>Days in field </strong>- {{srvMgeDetails.Days_in_Field}}&nbsp;<strong> Days Remaining </strong> - {{srvMgeDetails.Days_Remaining}} </td>
+						</tr>
+
+						<tr ng-if="surveyDetails.sr_launchTS">
+							<td>Survey Open/Close Date Info</td>
+							<td><strong>Launch Date </strong>- {{surveyDetails.sr_launchTS }} ,&nbsp; <strong> Close Date - </strong> {{surveyDetails.sr_closeTS || 'NA'}} ,&nbsp; <strong ng-if="surveyDetails.openDates"> Days - </strong> {{surveyDetails.openDates.d}} </strong>,&nbsp; <strong ng-if="surveyDetails.openDates"> Hours - </strong>{{surveyDetails.openDates.h}} ,&nbsp; <strong ng-if="surveyDetails.openDates"> Minutes - </strong>{{surveyDetails.openDates.m}},&nbsp; <strong ng-if="surveyDetails.openDates"> Total Minutes - </strong>{{surveyDetails.openDates.tm}}</td>
+						</tr>
+
+						<tr ng-if="supplier == 'none' && operator == 'none'">
+							<td>User Name</td>
+							<td>{{srvMgeDetails.buyerCompany}}</td>
+						</tr>
+						<tr>
+							<td>Survey Category</td>
+							<td>{{surveyDetails.samplesName }}</td>
+						</tr>
+						<tr>
+							<td>Category Exclusion</td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td>Include/Exclude</td>
+							<td ng-if ="surveyDetails.incl_excl == 0">Exclude</td>
+							<td ng-if ="surveyDetails.incl_excl == 1">Include</td>
+						</tr>
+						<tr>
+							<td>Survey Exclusion</td>
+							<td>{{surveyDetails.survey_grouping}}</td>
+						</tr>
+						<tr ng-if="supplier != 'none' || operator != 'none' ">
+							<td>Survey Live Entry Link</td>
+							<td><a target="_blank" href="{{buyerEntryLink}}">{{buyerEntryLink}}</a></td>
+						</tr>
+						<tr ng-if="operator == 'none'">
+							<td>Survey Test Entry Link</td>
+							<td><a target="_blank" href="{{buyerTestEntryLink}}">{{buyerTestEntryLink}}</a></td>
+						</tr>
+						<tr ng-if="supplier == 'none' && operator == 'none'">
+							<td>Billing PO/Project Number</td> <!-- PD-1254 -->
+							<td>{{surveyDetails.survey_po}}</td>
+						</tr>
+						<tr ng-if="supplier == 'none' && operator == 'none'">
+							<td>Billing External Id</td>
+							<td>{{surveyDetails.survey_external_id}}</td>
+						</tr>
+						<tr>
+							<td>Client</td>
+							<td>{{surveyDetails.survey_client}}</td>
+						</tr>
+						<tr>
+							<td>Buyer Message</td>
+							<td>{{surveyDetails.buyerMsg}}</td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<!-- Reconcile Tab opened here -->
+			<div id="buyer_reconcile" ng-if="operator != 'none' "" ng-show="isSet('buyer_reconcile')">
+			<div class="reconcile-inner">
+				<p>To reconcile completes, use the template to upload transaction IDs of every complete delivered for this project. Any IDs that we have recorded as status complete that you do not upload an ID for within the eligible timeframe will be overriden with a termination status.</p> <br/>
+				<div class="main-container">
+					<div class="child1_container" >
+						<label>Completes Achieved in Previous Month:</label> <br/><br/>
+						<label>{{availReconcileSurvey.recon_pre ? availReconcileSurvey.recon_pre : 0}} Available for Reconcilation Until {{prevMonth}}.</label> <button class="approve-buttons" ng-if="availReconcileSurvey.recon_pre > 0" ng-click="getReconciliationCount(2)">Approve All</button><br/><br/><br/>
+						<label>Completes Achieved in Current Month:</label><br/><br/>
+						<label>{{availReconcileSurvey.recon_curnt ? availReconcileSurvey.recon_curnt : 0}} Available For Reconcilation Until {{currentMonth}}.</label><button class="approve-buttons" ng-if="availReconcileSurvey.recon_curnt > 0" ng-click="getReconciliationCount(1)">Approve All</button>
+					</div>
+					<div class="child2_container" >
+						<div class="sabChild1_container" >
+							<label>Upload File</label>
+						</div>
+						<div class="sabChild2_container">
+							<input type="file" class="hide" id="fileModel" file-upload data-file="param.file" accept=".csv, .xls, .xlsx"/>
+							<input id="filePath" type="text" name="" ng-readonly="true" ng-click="inputBocClick()" placeholder=".csv, .xls, .xlsx" class="input-md" ng-model="param.file"> <br/> <br/>
+							<!-- .xlsx file format-->
+							<a target="_blank" href="/files/reconciliation.xlsx"><i> Download template </i> </a>
+
+							<br/><br/>
+							<button class="btn btn-info reconcile-innerbutton" ng-click="uploadBuyerReconciliationFile()" value="Upload" >Upload</button> <br/><br/>
+							<button class="btn btn-info reconcile-viewUpload" ng-click="viewPreviousUpload()" value="Upload" >View Previous Uploads</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<footer ng-if="showSurveyDetails && showFooterLink" id="edit-survey-footer">
+	<div class="container">
+		<ul>
+			<li><a ui-sref="updatesurvey({key: surveyDetails.id, edit:'editStep1',locale:survey_locale })">Survey Details <i class="fa fa-pencil" aria-hidden="true"></i></a></li>
+			<li><a ui-sref="choosesuppliers({surveyid: surveyDetails.id, edit:'editStep2' })" >Suppliers</a></li>
+			<li><a ui-sref="launchsurvey({surveyid: surveyDetails.id, edit:'editStep3' })">Final Details</a></li>
+		</ul>
+	</div>
+</footer>
+<!------------------Modal For Survey Status------------------>
+<div id="status-change-modal" class="modal" tabindex="-1" role="dialog" ng-show="showManageSurvey">
+	<div class="vertical-alignment-helper">
+		<div class="modal-dialog vertical-align-center">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title text-center">Save as {{toUpdate.status}} or close</h4>
+				</div>
+				<div class="modal-body">
+					<p class="text-center">Save Survey #{{toUpdate.id}} as {{toUpdate.status}}?</p>
+					<div class="text-center">
+						<a class="status-change-yes" ng-click="updateSurveyStatus()">Save as {{toUpdate.status}} and Close</a>
+						<a class="status-change-no" data-dismiss="modal">No thanks, close</a>
+					</div>
+					<div class="survey-state-success">
+						<p><span ng-if="showSuccessMessage">Success!</span> {{statusUpdateMsg}}</p>
+					</div>
+				</div>
+			</div><!-- /.modal-content -->
+		</div>
+	</div>
+</div><!-- /.modal -->
+
+<!---Modal For Draft Survey Delete-->
+<div id="survey-delete-modal" class="modal" tabindex="-1" role="dialog" ng-show="showManageSurvey">
+	<div class="vertical-alignment-helper">
+		<div class="modal-dialog vertical-align-center">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title text-center">DELETE DRAFT OR CLOSE</h4>
+				</div>
+				<div class="modal-body">
+					<p class="text-center">Delete Survey #{{toDelete.id}}?</p>
+					<div class="text-center">
+						<a class="status-change-yes" ng-click="deleteSurvey()"> Delete Draft and Close</a>
+						<a class="status-change-no" data-dismiss="modal">No thanks, close</a>
+					</div>
+					<div class="survey-state-success">
+						<p><span ng-if="showSuccessMessage">Success!</span> {{deleteSuccessMsg}}</p>
+					</div>
+				</div>
+			</div><!-- /.modal-content -->
+		</div>
+	</div>
+</div><!-- /.modal -->
+
+<!-- block creation alert modal -->
+<div class="modal fade" id="blockCreationModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog create-block-center">
+		<div class="modal-content1 panel-warning1">
+			<div class="modal-body1">
+				<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Are you sure?&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label><br/>
+				<!-- <p><input type="checkbox" name="">&nbsp;Don't warn me again</p> -->
+			</div>
+			<div class="modal-footer1">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="createNewPriceBlock()">OK</button>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal-fade -->
+
+
+<!-- Reconciliation confirm model -->
+<div id="reconcileModal" class="modal" tabindex="-1" role="dialog" ng-show="showManageSurvey">
+	<div class="vertical-alignment-helper">
+		<div class="modal-dialog vertical-align-center">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title text-center">Reconciliation</h4>
+				</div>
+				<div class="modal-body">
+					<br/>
+					<p class="text-center">Based on your upload, of the</p>
+					<p class="text-center">{{totalFileTrans}} transactions are eligible for reconciliation,</p>
+					<p class="text-center">you have reconcilied:</p> <br/>
+					<p class="text-center">{{transStatusComplt}} completes</p>
+					<p class="text-center">additionally , there were</p>
+					<p class="text-center">{{rejectTrans}} rejected completes</p>
+					<p class="text-center">{{changeToComplt}} transactions that were changed to complete.</p> <br/>
+					<p class="text-center">Once you confirm , you may no longer</p>
+					<p class="text-center">reconcile these transactions</p>
+					<div class="text-center">
+						<a class="status-change-yes" data-dismiss="modal" ng-click="confirmReconciliation()">Confirm</a>
+						<a class="status-change-no" data-dismiss="modal" ng-click="declineReconciliation()">No thanks, close</a>
+					</div>
+				</div>
+			</div><!-- /.modal-content -->
+		</div>
+	</div>
+</div>
+
+<!-- Reconciliation warning model -->
+<div id="reconcileWarnModal" class="modal" tabindex="-1" role="dialog" ng-show="showManageSurvey">
+	<div class="vertical-alignment-helper">
+		<div class="modal-dialog vertical-align-center">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title text-center"> Reconciliation</h4>
+				</div>
+				<div class="modal-body">
+					<h2><span class="glyphicon glyphicon-warning-sign" style="color: red;"></span>&nbsp;&nbsp;Reconciliation Failed</h2>
+					<p class="text-center">Your uploads contains transactions that are</p>
+					<p class="text-center">ineligible for reconciliation.</p>
+					<br/>
+					<p class="text-center">You may only reconcile completes in a closed survey, or completes</p>
+					<p class="text-center">from a prior month calendar</p>
+					<div class="text-center">
+						<a class="status-change-yes" data-dismiss="modal">Got it!</a>
+					</div>
+				</div>
+			</div><!-- /.modal-content -->
+		</div>
+	</div>
+</div>
+
+
+
+<!-- Reconciliation Approve model -->
+<div id="reconcileApprvModal" class="modal" tabindex="-1" role="dialog" ng-show="showManageSurvey">
+	<div class="vertical-alignment-helper">
+		<div class="modal-dialog vertical-align-center">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title text-center">Reconciliation Approve By Buyer</h4>
+				</div>
+				<div class="modal-body">
+					<p class="text-center">Do you want to reconcile following transactions:</p> <br/>
+					<p class="text-center">{{completeTrans}} completes</p>
+					<p class="text-center">{{rejectedTrans}} rejected completes</p>
+					<p class="text-center">{{statusChangeTrans}} transactions that were changed to complete.</p> <br/>
+					<div class="text-center">
+						<a class="status-change-yes" data-dismiss="modal" ng-click="confirmReconciliationMonth()">Confirm</a>
+						<a class="status-change-no" data-dismiss="modal">No thanks, close</a>
+					</div>
+				</div>
+			</div><!-- /.modal-content -->
+		</div>
+	</div>
+</div>
+
+<div id="groupZipcodesModal" class="modal" tabindex="-1" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title text-center">Conditions in {{zipcodeDetails.groupNo[0].name}}</h4>
+			</div>
+			<div class="modal-body">
+				<p class="text-center" style="word-break: break-all;">{{zipcodeDetails.zipcode}}</p>
+
+				<div class="text-center">
+					<a style="cursor:pointer;" class="status-change-yes" data-dismiss="modal">Got it!</a>
+				</div>
+			</div>
+		</div><!-- /.modal-content -->
+	</div>
+</div>
+
+
+<!-- loading icon -->
+<div class="overlay-div" ng-show="loader.show">
+	<div id="loader-wrapper">
+		<div id="loader"><span></span></div>
+	</div>
+</div>
+
+
+<div id="activityLogModal" class="modal" tabindex="-1" role="dialog" >
+    <div class="modal-dialog " style="width: 80%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title text-center">Activity Logs Details</h4>
+            </div>
+            <div class="modal-body" style="overflow: scroll;">
+                <ul>
+                    <li>
+                        <label>username : </label>{{activityLogsDetails.username}}
+                    </li>
+                    <li>
+                    	<label>activity : </label>{{activityLogsDetails.activity}}
+                    </li>
+                    <li>
+                    	<label>type : </label>{{activityLogsDetails.type}}
+                    </li>
+                    <li>
+                    	<label>timestamp : </label>{{activityLogsDetails.timestamp}}
+                    </li>
+                    <li>
+                    	<label>message : </label>{{activityLogsDetails.message}}
+                    </li>
+                    <!-- <li>
+                    	<label>warnLevel : </label>{{activityLogsDetails.warnLevel}}
+                    </li>
+                    <li>
+                    	<label>interval : </label>{{activityLogsDetails.interval}}
+                    </li>
+                    <li>
+                    	<label>quantity : </label>{{activityLogsDetails.quantity}}
+                    </li> -->
+                </ul>
+            </div>
+        </div><!-- /.modal-content -->
+    </div>
+</div>
+
+
+
+</div><br><br>
+<script>
+    jQuery(document).ready(function() {
+        //======= Active tabs ========
+        jQuery('.dashbrd-survey-table .nav.nav-tabs > li').click(function(e){
+            jQuery(this).siblings().removeClass('active');
+            jQuery(this).addClass('active');
+        });
+        //========= tabs functionality =========
+
+        jQuery('.dashbrd-survey-table .nav-tabs a').on('click', function(e){
+            e.preventDefault();
+            var currentAttrValue = jQuery(this).attr('href');
+            // Show/Hide Tabs
+            jQuery('.dashbrd-survey-table ' +currentAttrValue).show().siblings().hide();
+            // Change/remove current tab to active
+            jQuery(this).parent('li').addClass('active').siblings().removeClass('active');
+        });
+
+    });
+    jQuery('.dropdown-menu li a').click(function(e){
+        e.preventDefault();
+        var value = jQuery(this).text();
+        jQuery(this).parents('.dropdown').find('.btn.survey-style').text(value);
+    });
+    jQuery('body').removeClass('modal-open');
+    jQuery('.modal-backdrop').remove();
+	/*=======For Fixed datatable Header
+	 ===============
+	 var count = 0;
+	 $(window).scroll(function(){
+	 if($(window).scrollTop() > 140){
+	 $('.dashbrd-survey-table table.dashbrd-table thead').removeClass('not-fixed').addClass('fixedTableHeader');
+	 }else{
+	 $('.dashbrd-survey-table table.dashbrd-table thead').addClass('not-fixed').removeClass('fixedTableHeader');
+	 }
+	 });
+	 $(".dashbrd-survey-table #all table.dashbrd-table thead th").each(function(){
+	 $(this).parents('table.dashbrd-table').find('thead tr th:nth-child('+count+')').width($(this).width());
+	 $(this).parents('table.dashbrd-table').find('tbody tr td:nth-child('+count+')').width($(this).width());
+	 count++;
+	 });*/
+
+    function validateqty(txtBox, e) {
+        var key;
+
+        key = (e.keyCode) ? e.keyCode : e.charCode;
+        if (e.charCode == 0) {
+            return true;
+        }
+        if ((key < 48 || key > 57) && (key != 46) && (key != 44)) {
+            return false;
+        }
+        if (key == 46) {
+            //if ((txtBox.value).indexOf('.') != -1) {
+            return false;
+            //}
+        }
+        if (key == 44) {
+            //if ((txtBox.value).indexOf(',') != -1) {
+            return false;
+            //}
+        }
+        return true;
+    }
+
+
+
+</script>
+<style>
+	.dataTable.fixedHeader-floating{
+		display:block!important;
+	}
+	.manageSurvey .dataTable.fixedHeader-floating{
+		display:none!important;
+	}
+	.activity-ul{
+		padding: 0px 4%;
+	}
+	.activity-ul li {
+		text-align: left;
+		border-bottom: 1px solid #eaeaea;
+		margin-bottom: 2%;
+	}
+	.activity-textarea{
+		width: 100%;
+		height: 100px;
+	}
+</style>

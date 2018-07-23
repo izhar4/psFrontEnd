@@ -1,0 +1,87 @@
+<div ng-controller="suppliersCntrl">
+    <header class="dashbboard-header">
+        <div class="col-xs-12 col-sm-6 col-md-6 dash-logo-section">
+            <img class="img-responsive" src="img/logo-without-name.png" alt="Logo" title="" ui-sref="home" />
+            <p><a href="tel:+877865-PURE">(877) 865-PURE</a></p>
+        </div>
+        <div class="col-xs-12 col-sm-4 col-md-4 dashbrd-options pull-right text-right">
+            <a ng-if="showCreate" ui-sref="dynstate({id: 'CreateSurveys' })">+ New Survey</a>
+            <div class="dropdown user-options">
+                <button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <img class="img-responsive" src="img/dashbrd-header-menu.png" alt="menu" title="" />
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="user-actions">
+                    <li class="username">Hello {{userEmail}}</li>
+                    <!-- <li class="access-levels">
+                        <div class="col-xs-6">
+                            <p>Platform capabilities:</p>
+                            <span>Buyer = {{buyer}}</span>
+                            <span>Supplier = {{supplier}}</span>
+                            <span>Operator = {{operator}}</span>
+                        </div>
+                        <div class="col-xs-6">
+                            <p>Access Levels:</p>
+                            <span>Buyerside = {{buyerrole}}</span>
+                            <span>Supplierside = {{supplierrole}}</span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </li> -->
+                    <li ng-repeat="link in dsboardLink"> <button type="button" class="btn btn-link" ui-sref="dynstate({id: {{'link.featureKey'}} })" >{{link.featureLabel}}</button></li>
+                    <li><a ui-sref="resetPassword">Reset Password</a></li>
+                    <li><a ng-click="logout()">Logout</a></li>
+                 </ul>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </header>
+    <section class="pad">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-11 col-md-8 survey">
+                        <h4 class="text-center">Manage Suppliers</h4>
+                        <table style="width:100%;">
+                        	<thead>
+                        		<th>
+                        			Name
+                        		</th>
+                        		<!--<th>Preferred</th>-->
+                        		<th>Blocked</th>
+                        	</thead>
+                        	<tbody>
+                            <!-- make Manage Suppliers underline and selectable row -->
+                        		<tr class="supplierSettingrow" ng-repeat="supplier in suppliers" ng-class="{supplierrowSelected : selectDeselectRow == true ? true : false}" ng-click="selectDeselectRow = !selectDeselectRow">
+                        			<td>{{supplier.name}}</td>
+                        			<!--<td>
+                        				<input type="checkbox" ng-model="supplierTypes.preferredTypes[$index]" ng-checked="{{supplier.supplrSt == 'P'}}" ng-change="setPreffered($index)">
+                        			</td>-->
+                        			<td>
+                        				<input type="checkbox" ng-model="supplierTypes.blockedTypes[$index]" ng-checked="{{supplier.supplrSt == 'B'}}" ng-change="setBlocked($index)">
+                        			</td>
+                        		</tr>
+                        	</tbody>
+                        </table>
+                        <br/>
+                        <table style="width:100%;">
+                        <tr>
+                        	<td>
+                        		<button type="submit" class="btn btn-default submit-btn" ng-click="bckDashboard()">Back To Dashboard</button>
+                        	</td>
+                        	<td>
+                                <button type="submit" class="btn btn-default submit-btn pull-right" ng-click="saveSuppliers()">Save</button>
+                        	</td>
+                        </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    </section>
+    <footer ng-cloak ng-if="!fotrHide" >
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12">
+                    <p>All Content &copy; 2015 PureSpectrum&reg; Marketplace Inc. All Rights Reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>

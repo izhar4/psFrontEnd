@@ -1,0 +1,140 @@
+<div ng-controller="invoiceCtrl" class="dashbdr_wrapper" ng-init="initData()">
+    <header class="dashbboard-header">
+        <div class="col-xs-12 col-sm-6 col-md-6 dash-logo-section">
+            <img class="img-responsive" src="img/logo-without-name.png" alt="Logo" title="" ui-sref="home" />
+            <p><a href="tel:+877865-PURE">(877) 865-PURE</a></p>
+        </div>
+        <div class="col-xs-12 col-sm-4 col-md-4 dashbrd-options pull-right text-right">
+            <div class="dropdown user-options">
+                <button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <img class="img-responsive" src="img/dashbrd-header-menu.png" alt="menu" title="" />
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="user-actions">
+                    <li class="username">Hello {{userEmail}}</li>
+                    <!-- <li class="access-levels">
+                        <div class="col-xs-6">
+                            <p>Platform capabilities:</p>
+                            <span>Buyer = {{buyer}}</span>
+                            <span>Supplier = {{supplier}}</span>
+                            <span>Operator = {{operator}}</span>
+                        </div>
+                        <div class="col-xs-6">
+                            <p>Access Levels:</p>
+                            <span>Buyerside = {{buyerrole}}</span>
+                            <span>Supplierside = {{supplierrole}}</span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </li> -->
+                    <li ng-repeat="link in dsboardLink"> <button type="button" class="btn btn-link" ui-sref="dynstate({id: {{'link.featureKey'}} })" >{{link.featureLabel}}</button></li>
+					<li><a ng-click="resetPassword($event)">Reset Password</a></li>
+                    <li><a ng-click="logout($event)">Logout</a></li>
+                 </ul>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </header>
+    <section class="pad">
+        <div class="container">
+            <div class="row survey-form">
+                <div class="col-xs-12 col-sm-12 col-md-11 survey">
+                    <div class="page-header">
+                      <h1>Manage Invoices</h1>
+                    </div>
+                     <div class="form-inline mar0">
+                            <!-- company select -->
+                            <div class="col-sm-6 col-md-4 form-group">
+                                <label>Company</label>
+                                <div class="dropdown dropdown-scroll">
+                                    <button class="btn btn-default dropdown-toggle survey-style width100" type="button" id="Survey_Country" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                    {{selectedCompany.name}}
+                                    </button>
+                                    <ul class="dropdown-menu company_search" aria-labelledby="Survey_Country">
+                                        <li role="presentation">
+                                          <div class="input-group input-group-sm search-control"> <span class="input-group-addon">
+                                            <span class="glyphicon glyphicon-search"></span>
+                                            </span>
+                                            <input type="text" class="form-control" placeholder="Search" ng-model="compnyFilter"></input>
+                                          </div>
+                                        </li>
+                                        <li><a href="" ng-click="selectCompany('all')">All</a></li>
+                                        <li role="separator" class="divider"></li>
+                                        
+                                        <li ng-repeat="comp in companies | filter:compnyFilter"><a href="" ng-click="selectCompany(comp)">{{comp.name}}</a></li>
+                                        
+                                    </ul>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                            <!-- month select -->
+                            <div class="col-sm-6 col-md-4 form-group">
+                                <label>Month</label>
+                                <div class="dropdown">
+                                    <button class="btn btn-default dropdown-toggle survey-style width100" type="button" id="Survey_Country" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                    {{selectedMonth.month}}
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="Survey_Country">                                        
+                                        <li><a href="javascript:void(0)" ng-click="monthSelect('01', 'January')">January</a></li>
+                                        <li><a href="javascript:void(0)" ng-click="monthSelect('02', 'February')">February</a></li>
+                                        <li><a href="javascript:void(0)" ng-click="monthSelect('03', 'March')">March</a></li>
+                                        <li><a href="javascript:void(0)" ng-click="monthSelect('04', 'April')">April</a></li>
+                                        <li><a href="javascript:void(0)" ng-click="monthSelect('05', 'May')">May</a></li>
+                                        <li><a href="javascript:void(0)" ng-click="monthSelect('06', 'June')">June</a></li>
+                                        <li><a href="javascript:void(0)" ng-click="monthSelect('07', 'July')">July</a></li>
+                                        <li><a href="javascript:void(0)" ng-click="monthSelect('08', 'August')">August</a></li>
+                                        <li><a href="javascript:void(0)" ng-click="monthSelect('09', 'September')">September</a></li>
+                                        <li><a href="javascript:void(0)" ng-click="monthSelect('10', 'October')">October</a></li>
+                                        <li><a href="javascript:void(0)" ng-click="monthSelect('11', 'November')">November</a></li>
+                                        <li><a href="javascript:void(0)" ng-click="monthSelect('12', 'December')">December</a></li>
+                                    </ul>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                            <!-- year select -->
+                            <div class="col-sm-6 col-md-4 form-group">
+                                <label>Year</label>
+                                <div class="dropdown dropdown-scroll">
+                                    <button class="btn btn-default dropdown-toggle survey-style width100" type="button" id="Survey_Country" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                    {{selectedYear}}
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="Survey_Country">
+                                        <li><a href="javascript:void(0)" ng-click="selectYear(2018)">2018</a></li>
+                                        <li><a href="javascript:void(0)" ng-click="selectYear(2017)">2017</a></li>
+                                        <li><a href="javascript:void(0)" ng-click="selectYear(2016)">2016</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row survey-form">
+                <div class="col-xs-12 invoice-btns" >
+                    <button type="button" class="btn btn-primary addQuotas-btn pull-left" ui-sref="home">Back to Dashboard</button>
+                    <button type="button" class="btn btn-primary addQuotas-btn pull-left" ng-click="downloadInvoice()">Download</button>
+                    <button type="button" class="btn btn-primary addQuotas-btn pull-left" ng-click="downloadPdfInvoice('buyerInvoiceReport')">
+                    Download Buyer PDF</button>
+                    <button type="button" class="btn btn-primary addQuotas-btn pull-left" ng-click="downloadPdfInvoice('supplierInvoiceReport')">Download Supplier PDF</button>
+                    <button type="button" class="btn btn-primary addQuotas-btn pull-left" ng-click="downloadPdfInvoice('buyerInvoiceXlsxReport')">
+                    Download Buyer XLSX</button>
+                    <button type="button" class="btn btn-primary addQuotas-btn pull-left" ng-click="downloadPdfInvoice('supplierInvoiceXlsxReport')">Download Supplier XLSX</button>
+                </div>
+            </div>
+        </div>
+    </section>   
+
+ <!-- loading icon -->
+    <div class="overlay-div" ng-show="tabs.makeDisable">
+        <div id="loader-wrapper">
+            <div id="loader"><span></span></div>
+        </div>
+    </div>
+
+
+
+</div><br><br>
+
+<script type="text/javascript">
+    $('.dropdown-menu input, .dropdown-menu .search-control').click(function(e) {
+        e.stopPropagation();
+    });
+</script>
+

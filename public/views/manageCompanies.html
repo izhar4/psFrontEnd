@@ -1,0 +1,221 @@
+<div ng-controller="companiesCntrl">    
+    <header class="dashbboard-header">
+        <div class="col-xs-12 col-sm-6 col-md-6 dash-logo-section">
+            <img class="img-responsive" src="img/logo-without-name.png" alt="Logo" title="" ui-sref="home" />
+            <p><a href="tel:+877865-PURE">(877) 865-PURE</a></p>
+        </div>
+        <div class="col-xs-12 col-sm-4 col-md-4 dashbrd-options pull-right text-right">
+            <a ng-if="showCreate" ui-sref="dynstate({id: 'CreateSurveys' })">+ New Survey</a>
+            <div class="dropdown user-options">
+                <button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <img class="img-responsive" src="img/dashbrd-header-menu.png" alt="menu" title="" />
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="user-actions">
+                    <li class="username">Hello {{ userEmail }}</li>
+                    <li ng-repeat="link in dsboardLink"> <button type="button" class="btn btn-link" ui-sref="dynstate({id: {{'link.featureKey'}} })" >{{ link.featureLabel }}</button></li>
+                    <li><a ng-click="resetPassword()">Reset Password</a></li>
+                    <li><a ng-click="logout()">Logout</a></li>
+                 </ul>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </header>
+    <div class="container" style="margin-top: 100px">
+        <div class="row">
+            <div class="col-xs-12 col-sm-5 col-md-5">
+                <form class="form-horizontal">
+                    <button type="button" class="btn btn-primary pull-left submit-btn" style="margin-left: 20px;" ui-sref="home">Back to Dashboard</button>
+                    <button type="button" class="btn btn-primary submit-btn pull-right" ng-click="newCompany()">New Company</button>
+                    <legend style="padding-top: 50px">Company Listing</legend>
+                    <div class="panel panel-default">
+                        <div class="panel-body " style="height: 200px;overflow-y: auto;">
+                            <ul>
+                                <li ng-repeat="data in companyinfo"><a href="" ng-click="fetchCompanyData(data)">{{ data.name }} </a></li>
+                             </ul>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-xs-12 col-sm-5 col-md-5 pull-right">
+                <form class="form-horizontal">
+                    <div class="panel panel-default">
+                        <div class="panel-body ">
+                            <form class="form-horizontal">
+                                <legend> Company Info</legend>
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label">Name</label>
+                                    <div class="col-md-8">
+                                        <input name="textinput" type="text" placeholder="Name" class="form-control input-md" ng-model="showCompanyInfo.name">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label">Address</label>
+                                    <div class="col-md-8">
+                                        <input  name="textinput" type="text" placeholder="Address" class="form-control input-md" ng-model="showCompanyInfo.address">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label">Currency</label>
+                                    <div class="col-md-8 dropdown dropdown-scroll">
+                                        <button class="btn btn-default dropdown-toggle survey-style width100" ng-disabled="disableCurrency" type="button" id="select_currency" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="width: 100%;text-align: left;">
+                                            {{ selectedCurrency.name || currencyPlaceholder }}
+                                        </button>
+                                        <ul class="dropdown-menu company_search" aria-labelledby="select_currency" style="height: auto; max-height: 250px;overflow-x: hidden;">
+                                            <li role="presentation">
+                                                <div class="input-group input-group-sm search-control">
+                                                    <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
+                                                    <input type="text" class="form-control" placeholder="Search" ng-model="currencyFilter">
+                                                </div>
+                                            </li>
+                                            <li ng-repeat="currency in currencies | filter:currencyFilter">
+                                                <a href="" ng-click="selectCurrency(currency);">{{ currency.name }}</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                    <script type="text/javascript">
+                                        $('.dropdown-menu input, .dropdown-menu .search-control').click(function(e) {
+                                            e.stopPropagation();
+                                        });
+                                    </script>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label">Phone</label>
+                                    <div class="col-md-8">
+                                        <input name="" type="text" placeholder="Phone" class="form-control input-md" ng-model="showCompanyInfo.phone" >
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label">Primary Liason</label>
+                                    <div class="col-md-8">
+                                        <input name="" type="text" placeholder="Primary Liason" class="form-control input-md" ng-model="showCompanyInfo.primaryLiaison">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" >Secondary Liason </label>
+                                    <div class="col-md-8">
+                                        <input  name="textinput" type="text" placeholder="Secondary Liason " class="form-control input-md" ng-model="showCompanyInfo.secondaryLiaison">
+                                    </div>
+                                </div>
+
+                                <!-- ----  supplier urls ------------>
+                                <div class="form-group" ng-show="showCompanyInfo.isASupplier == '1'">
+                                    <label class="col-md-4 control-label" >Supplier Url For Completes: </label>
+                                    <div class="col-md-8">
+                                        <input  name="textinput" type="text" placeholder="Supplier Url For Completes " class="form-control input-md" ng-model="showCompanyInfo.supp_url_completes">
+                                    </div>
+                                </div>
+
+                                <div class="form-group" ng-show="showCompanyInfo.isASupplier == '1'">
+                                    <label class="col-md-4 control-label" >Supplier Url For Terms: </label>
+                                    <div class="col-md-8">
+                                        <input  name="textinput" type="text" placeholder="Supplier Url For Terms " class="form-control input-md" ng-model="showCompanyInfo.supp_url_terms">
+                                    </div>
+                                </div>
+
+                                <div class="form-group" ng-show="showCompanyInfo.isASupplier == 1">
+                                    <label class="col-md-4 control-label" >Supplier Url For OverQuotas: </label>
+                                    <div class="col-md-8">
+                                        <input  name="textinput" type="text" placeholder="Supplier Url For OverQuotas " class="form-control input-md" ng-model="showCompanyInfo.supp_url_overquota">
+                                    </div>
+                                </div>
+
+                                <div class="form-group" ng-show="showCompanyInfo.isASupplier == 1">
+                                    <label class="col-md-4 control-label" >Supplier Url For Security Termination: </label>
+                                    <div class="col-md-8">
+                                        <input  name="textinput" type="text" placeholder="Supplier Url For Security Termination " class="form-control input-md" ng-model="showCompanyInfo.supp_url_security_terms">
+                                    </div>
+                                </div>
+
+                                <div class="form-group" ng-show="showCompanyInfo.isASupplier == 1">
+                                    <label class="col-md-4 control-label" > Send Notification</label>
+                                    <div class="col-md-8">
+                                        <label class="radio-inline">
+                                            <input type="radio" name="rdo1" id="notify" value=1 ng-model="showCompanyInfo.isNotify" >
+                                            Yes
+                                        </label>
+                                        <label class="radio-inline" >
+                                            <input type="radio" name="rdo1"   value=0 ng-model="showCompanyInfo.isNotify" >
+                                            No
+                                        </label>
+                                    </div>
+                                </div>
+                                    
+                                <!-- PD-607 -->
+                                <div class="form-group" ng-show="showCompanyInfo.isASupplier == 1">
+                                    <label class="col-md-4 control-label" > Expose Buyer ID by API</label>
+                                    <div class="col-md-8">
+                                        <label class="radio-inline">
+                                            <input type="radio" name="rdo5" value=1 ng-model="showCompanyInfo.isExpose" ng-click="changeDefault()">
+                                            Yes
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input type="radio" name="rdo5" value=0 ng-model="showCompanyInfo.isExpose" ng-click="makeDefaultChk()">
+                                            No
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" >Is A Buyer</label>
+                                    <div class="col-md-8">
+                                        <label class="radio-inline">
+                                            <input type="radio" name="rdo2" id="buyer" value=1 ng-model="showCompanyInfo.isABuyer" >
+                                            Yes
+                                        </label>
+                                        <label class="radio-inline" >
+                                            <input type="radio" name="rdo2"   value=0 ng-model="showCompanyInfo.isABuyer" >
+                                            No
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" >Is A Supplier</label>
+                                    <div class="col-md-8">
+                                        <label class="radio-inline">
+                                            <input type="radio" name="rdo3" value=1 ng-model="showCompanyInfo.isASupplier" >
+                                            Yes
+                                        </label>
+                                        <label class="radio-inline" >
+                                            <input type="radio" name="rdo3"  value=0 ng-model="showCompanyInfo.isASupplier" >
+                                            No
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" >Is An Operator</label>
+                                    <div class="col-md-6">
+                                        <label class="radio-inline">
+                                            <input type="radio" name="rdo4"  value=1 checked ng-model="showCompanyInfo.isAnOperator" >
+                                            Yes
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input type="radio" name="rdo4"  value=0 ng-model="showCompanyInfo.isAnOperator" >
+                                            No
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-xm-6 col-md-12 col-sm-12 pull-right">
+                                    <div class="btn-group-md">
+                                        <button class="btn btn-warning btnSpace" ng-click="cancelCompanyInfo()" >Cancel</button>
+                                        <button class="btn btn-success btnSpace" ng-show="shUpdate==true" ng-click="updateCompanyDetails(showCompanyInfo)">Update</button>
+                                        <button class="btn btn-success btnSpace" ng-show="shSave==true" ng-disabled="!showCompanyInfo.name || ! showCompanyInfo.address || ! showCompanyInfo.phone || !showCompanyInfo.primaryLiaison || ! showCompanyInfo.secondaryLiaison || ! showCompanyInfo.isABuyer || ! showCompanyInfo.isASupplier || ! showCompanyInfo.isAnOperator||(showCompanyInfo.isASupplier ==1 && (!showCompanyInfo.supp_url_completes || !showCompanyInfo.supp_url_terms || !showCompanyInfo.supp_url_overquota))"  ng-click="saveCompanyDetails(showCompanyInfo)" >Save</button>
+                                        <button class="btn btn-danger btnSpace" ng-show="shDelete==true"  ng-click="deleteCompany(showCompanyInfo.id)">Delete</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <br><br>
+</div>

@@ -1,0 +1,112 @@
+<div class="container" ng-controller="manageOperatorCtrl">
+     <header class="dashbboard-header">
+        <div class="col-xs-12 col-sm-6 col-md-6 dash-logo-section">
+            <img class="img-responsive" src="img/logo-without-name.png" alt="Logo" title="" ui-sref="home"  />
+            <!--<div class="dashbdr-search">
+                <input type="text" required=""  name="" class="form-control" style="" placeholder="Search">
+            </div>-->
+            <p><a href="tel:+877865-PURE">(877) 865-PURE</a></p>
+        </div>
+        <div class="col-xs-12 col-sm-4 col-md-4 dashbrd-options pull-right text-right">
+            <!--<div class="col-xs-12 col-md-6 col-sm-6" >
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <label>Logged in as: </label>  &nbsp {{userName}}<br>
+                        <label>Platform capabilities:</label>&nbsp Buyer={{buyer}},&nbsp Supplier={{supplier}},&nbsp Operator={{operator}}<br>
+                        <label>Access Levels:</label>&nbsp Buyerside={{buyerrole}},&nbsp Supplierside={{supplierrole}}
+                    </div>
+                </div>
+            </div>-->
+            <!--<p>Welcome <span>{{userName}}</span></p>-->
+            <a ng-if="showCreate" ui-sref="dynstate({id: 'CreateSurveys' })">+ New Survey</a>
+            <div class="dropdown user-options">
+                <button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <img class="img-responsive" src="img/dashbrd-header-menu.png" alt="menu" title="" />
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="user-actions">
+                    <li class="username">Hello {{userEmail}}</li>
+                    <!-- <li class="access-levels">
+                        <div class="col-xs-6">
+                            <p>Platform capabilities:</p>
+                            <span>Buyer = {{buyer}}</span>
+                            <span>Supplier = {{supplier}}</span>
+                            <span>Operator = {{operator}}</span>
+                        </div>
+                        <div class="col-xs-6">
+                            <p>Access Levels:</p>
+                            <span>Buyerside = {{buyerrole}}</span>
+                            <span>Supplierside = {{supplierrole}}</span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </li> -->
+                    <li ng-repeat="link in dsboardLink"> <button type="button" class="btn btn-link" ui-sref="dynstate({id: {{'link.featureKey'}} })" >{{link.featureLabel}}</button></li>
+                    <li><a ng-click="resetPassword()">Reset Password</a></li>
+                    <li><a ng-click="logout()">Logout</a></li>
+                 </ul>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </header>
+     <div class="container paddtop100">
+           <button type="button" class="btn btn-primary submit-btn mrgleft200" ui-sref="home">Back to Dashboard</button>
+          <h2 class="text-center paddrght200">Manual Survey Traffic Fixes<SPAN></SPAN></h2>
+        <section class="pad width700">
+  <div class="col-md-12 operator-traffic-fixes">
+      <ul class="nav nav-tabs custom-tabs">
+             <li role="presentation" class="active"><a  aria-controls="statusPriceUpdate" role="tab" data-toggle="tab" ng-click="statusUpdate()" >Manual Status & Price Updates</a></li>
+           <!--  <li role="presentation" class=""><a  aria-controls="statusupdate" role="tab" data-toggle="tab" ng-click="statusUpdate()" >Status Updates</a></li>
+            <li role="presentation"><a aria-controls="priceupdates" role="tab" data-toggle="tab" ng-click="priceUpdate()">Price Updates</a></li>
+            <li role="presentation"><a aria-controls="deletion" role="tab" data-toggle="tab" ng-click="statusDeletion()">Deletions</a></li> -->
+        </ul>
+  </div>
+  <div class="manualstatusupdate">
+    <h1 ng-show="showSPU">Manual Status & Price Updates</h1>
+    <h1 ng-show="showStatus">Manual Status Updates</h1>
+    <h1 ng-show="showPrice">Manual Price Updates</h1>
+    <h1 ng-show="showDelete">Manual Deletion</h1>
+    <div class="upload_file">
+         <input type="file" class="hide" id="fileMobile" file-model="myFile"/>
+       <!--  <ul>
+            <li>Upload File:</li>
+            <li>   <input  name="textinput" type="text" placeholder="File Path" ng-readonly="true" class="form-control input-md" ng-model="filepath"></li>
+            <li> <button type="button" class="btn btn-default margtop" ng-click="clickUpload()">Browse</button>
+            </li>
+        </ul> -->
+         <div class="form-group divset" >
+                <label class="pull-left control-label" >Upload File: </label>
+                <div class="col-md-4">
+                    <input  name="textinput" type="text" placeholder="File Path" ng-readonly="true" class="form-control input-md" ng-model="filepath">
+                     <a ng-show="showStatusAndPrice" href="/static/Price Update Sample File v2.xlsx"  target="_self">Sample File</a>
+                     <a ng-show="showStatus" href="/static/Status Update Sample File v1.0.xlsx"  target="_self">Sample File</a>
+                     <a ng-show="showPrice" href="/static/Price Update Sample File v1.0.xlsx"  target="_self">Sample File</a>
+                     <a ng-show="showDelete" href="/static/Deletion Sample File v1.0.xlsx"  target="_self">Sample File</a>
+                </div>
+                 <div class="col-md-6">
+                   <button type="button" class="btn btn-default" ng-click="clickUpload()">Browse</button>
+
+                </div>
+            </div>
+       
+        
+    </div>
+     <div class=" col-md-10 run_recalc padding-top" ng-show="showStatusAndPrice">
+        <button class="btn btn-info" ng-click="statusPriceUpdateFile()" value="Upload">Run </br> (without auto price-recalc)</button>
+        <button class="btn btn-info mrgleft20" ng-click="statusPriceUpdateFile()" value="Upload" ng-disabled="true">Run </br> (WITH auto price-recalc)</button>
+    </div>
+
+    <div class=" col-md-10 run_recalc padding-top" ng-show="showStatus">
+        <button class="btn btn-info" ng-click="statusUpdateFile()" value="Upload">Run </br> (without auto price-recalc)</button>
+        <button class="btn btn-info mrgleft20" ng-click="statusUpdateFile()" value="Upload" ng-disabled="true">Run </br> (WITH auto price-recalc)</button>
+    </div>
+
+    <div class=" col-md-10 run_Price padding-top" ng-show="showPrice">
+        <button class="btn btn-info" ng-click="priceUpdateFile()">Run</button>
+    </div>
+    <div class="col-md-10 run_deletion padding-top" ng-show="showDelete">
+        <button class="btn btn-info " ng-click="deletionFile()">Run</button>
+    </div>
+    
+  </div>
+</div>
+</section>
+</div>

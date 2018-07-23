@@ -1,0 +1,288 @@
+<div ng-controller="priceCardCtrl">
+    <header class="dashbboard-header">
+        <div class="col-xs-12 col-sm-6 col-md-6 dash-logo-section">
+            <img class="img-responsive" src="img/logo-without-name.png" alt="Logo" title="" ui-sref="home" />
+            <p><a href="tel:+877865-PURE">(877) 865-PURE</a></p>
+        </div>
+        <div class="col-xs-12 col-sm-4 col-md-4 dashbrd-options pull-right text-right">
+            <a ng-if="showCreate" ui-sref="dynstate({id: 'CreateSurveys' })">+ New Survey</a>
+            <div class="dropdown user-options">
+                <button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <img class="img-responsive" src="img/dashbrd-header-menu.png" alt="menu" title="" />
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="user-actions">
+                    <li class="username">Hello {{userEmail}}</li>
+                    <!-- <li class="access-levels">
+                        <div class="col-xs-6">
+                            <p>Platform capabilities:</p>
+                            <span>Buyer = {{buyer}}</span>
+                            <span>Supplier = {{supplier}}</span>
+                            <span>Operator = {{operator}}</span>
+                        </div>
+                        <div class="col-xs-6">
+                            <p>Access Levels:</p>
+                            <span>Buyerside = {{buyerrole}}</span>
+                            <span>Supplierside = {{supplierrole}}</span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </li> -->
+                    <li ng-repeat="link in dsboardLink"> <button type="button" class="btn btn-link" ui-sref="dynstate({id: {{'link.featureKey'}} })" >{{link.featureLabel}}</button></li>
+                    <li><a ng-click="resetPassword()">Reset Password</a></li>
+                    <li><a ng-click="logout($event)">Logout</a></li>
+                 </ul>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </header>
+<div class="container">
+    <section class="pad pricing-card">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-10 col-md-offset-1 survey">
+                    <h4>Supplier Price Card</h4>
+                    <form class="create-survey">
+                        <div class="survey-form mar70">
+                            <div class="form-inline">
+                                <div class="col-xs-12 col-sm-4 col-md-4">
+                                    <label>Country</label>
+                                    <div class="dropdown">
+                                        <button class="btn btn-default dropdown-toggle survey-style width100" type="button"  data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                            {{cntry}}
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="Survey_Sample_Title">
+                                            <li ng-repeat="data in cntryMaster"><a href=""ng-click="getCountry(data)">{{data.name}} </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-4 col-md-4">
+                                    <label>Language</label>
+                                    <div class="dropdown">
+                                        <button class="btn btn-default dropdown-toggle survey-style width100" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                            {{lng}}
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="Survey_Sample_Title">
+                                            <li ng-repeat="data in lngMaster"><a  href="" ng-click="getLanguage(data)" >{{data.name}} </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-4 col-md-4 ">
+                                    <label>Buyer CounterParty</label>
+                                    <div class="dropdown">
+                                        <button class="btn btn-default dropdown-toggle survey-style width100" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                            {{byrOp}}
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="Survey_Sample_Title">
+                                            <li ng-repeat="data in buyerCombo"><a href="" ng-click="getBuyerCounterparty(data)">{{data.name}} </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="clearfix"></div>
+                <div class="col-xs-12 col-sm-8 col-md-8 col-md-offset-1 survey supplier-pricing">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><label>Pricing</label></div>
+                        <div class="pricingcard-detail-tabs">
+                            <ul class="list-inline" role="tablist">
+                                <li ng-class="{ active: isSet(1)  }" class="inactive">
+                                    <a href ng-click="setTab(1)">PRICING METHOD</a>
+                                </li>
+                                <li ng-class="{ active: isSet(2) , current_method : pricingMethod == 'formula' }">
+                                    <a href ng-click="setTab(2)">FORMULA</a>
+                                </li>
+                                <li ng-class="{ active: isSet(3) , current_method : pricingMethod == 'manual_price_card' }">
+                                    <a href ng-click="setTab(3)">MANUAL RATE CARD</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="panel-body " ng-show="isSet(1)" align="center">
+                            <p><b>{{pricingMethod}}<b></p>
+                        </div>   
+                        <!-- end of tab 1  --> 
+
+                        <div class="panel-body " ng-show="isSet(2)">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label class="control-label col-xs-4">EPC</label>
+                                    <div class="col-xs-6">
+                                        <input type="number" onkeypress='return validateQty(event, this);'  class="form-control" placeholder="EPC Value" ng-model="priceCardObj.EPCM">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-xs-4">Base Reward</label>
+                                    <div class="col-xs-6">
+                                        <input type="number" onkeypress='return validateQty(event, this);' class="form-control"  placeholder="EPC Floor" ng-model="priceCardObj.EPCFloor">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-xs-4">Minimum Price</label>
+                                    <div class="col-xs-6">
+                                        <input type="number" onkeypress='return validateQty(event, this);' class="form-control"  placeholder="Minimum Price" ng-model="priceCardObj.minimumPrice">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-xs-4">Minimum Price Per Minute</label>
+                                    <div class="col-xs-6">
+                                        <input type="number" onkeypress='return validateQty(event, this);' class="form-control"  placeholder="Minimum Price Per Minute" ng-model="priceCardObj.minimumPricePerMinute">
+                                    </div>
+                                </div>
+                                <!--<div class="form-group">
+                                    <label class="control-label col-xs-4">Increment by Min</label>
+                                    <div class="col-xs-6">
+                                        <input type="number" onkeypress='return validateQty(event);' class="form-control"  placeholder="Increment by Min" ng-model="priceCardObj.incrementByMin">
+                                    </div>
+                                </div>-->
+                            </form>
+                            <div class="button-group">
+                                <div class="pull-left">
+                                    <button type="button" class="btn btn-primary submit-btn" ui-sref="home">Back to Dashboard</button>
+                                </div>
+                                <div class="pull-left">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-disabled="dctEnable=='false'" ng-click="deactivatePriceCard()">Deactivate</button>
+                                </div>
+                                <div class="pull-right">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-disabled="!priceCardObj.EPCM || !priceCardObj.EPCFloor || !priceCardObj.minimumPrice" ng-click="savePricingCardData()" ng-if="isSet(2)">Save</button>
+
+                                    <button type="button" class="btn btn-primary submit-btn" ng-click="saveUploadCSV(csv.result)" ng-if="isSet(3)">Save</button>
+                                </div>
+                                <div class="pull-right">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-disabled="!priceCardObj.EPCM || !priceCardObj.EPCFloor || !priceCardObj.minimumPrice" ng-click="cancelSupplier()">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- end of tab 2  -->  
+
+
+                        <div class="panel-body " ng-show="isSet(3)" align="center">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <span class="handle-text">Upload a File (.csv) </span>
+                                    <ng-csv-import content="csv.content"
+                                        material
+                                        md-button-class="md-icon-button md-raised md-accent"
+                                        md-svg-icon="file:ic_file_upload_24px"
+                                        header="csv.header"
+                                        separator="csv.separator"
+                                        result="csv.result"
+                                        accept="csv.accept"></ng-csv-import> <br/>
+
+                                    <a href="/ManualPriceCardExample.csv" class="btn btn-default"><span class="handle-dwnldTxt">Download Template </span>
+                                    <span class="glyphicon glyphicon-question-sign"></span></a><br/> <br/>
+
+                                     <!-- <button loader="loader.show" ng-disabled="pricingMethod != 'manual_price_card'" class="btn btn-default " type="button" 
+                                      data-toggle="modal" data-target="#priceCardModal" ng-click="viewLatestUpload()"><span class="handle-text">View Latest Upload </span></button> -->
+                                    
+                                       <button loader="loader.show" ng-disabled="pricingMethod != 'manual_price_card'" class="btn btn-default " type="button"
+                                      ng-click="downloadLatestUpload()"><span class="handle-text">Download Latest Upload </span></button>
+                                       <br/>
+
+                                     <span>or</span> <br/>
+
+                                     <button ng-disabled="pricingMethod != 'manual_price_card'" class="btn btn-default " type="button" ng-click=""><span class="handle-text">Clear Rate Card </span> </button> <br/>
+                                </div>
+                            </form>
+                            <div class="button-group">
+                                <div class="pull-left">
+                                    <button type="button" class="btn btn-primary submit-btn" ui-sref="home">Back to Dashboard</button>
+                                </div>
+                                <div class="pull-left">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-disabled="dctEnable=='false'" ng-click="deactivatePriceCard()">Deactivate</button>
+                                </div>
+                                <div class="pull-right">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-disabled="!priceCardObj.EPCM || !priceCardObj.EPCFloor || !priceCardObj.minimumPrice" ng-click="savePricingCardData()" ng-if="isSet(2)">Save</button>
+
+                                    <button type="button" class="btn btn-primary submit-btn" ng-click="saveUploadCSV(csv.result)" ng-if="isSet(3)">Save</button>
+                                </div>
+                                <div class="pull-right">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-disabled="!priceCardObj.EPCM || !priceCardObj.EPCFloor || !priceCardObj.minimumPrice" ng-click="cancelSupplier()">Cancel</button>
+                                </div>
+                            </div>
+                        </div>   
+                        <!-- end of tab 3  -->  
+                        
+                    </div>
+                </div>
+
+            </div>
+        </div>
+     
+    </section>
+</div>
+
+ <!-- loading icon -->
+    <div class="overlay-div" ng-show="loader.show">
+        <div id="loader-wrapper">
+            <div id="loader"><span></span></div>
+        </div>
+    </div>
+
+
+<div id="priceCardModal" class="modal" tabindex="-1" role="dialog" >
+        <div class="modal-dialog " style="width: 80%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title text-center">Supplier Price Card</h4>
+                </div>
+                <div class="modal-body" style="overflow: scroll;">
+                    <table>
+                        <thead>
+                            <tr class="text-center"><td></td>
+                                <td ng-repeat= "key in irKeys track by $index"> {{key}}</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="arr in arrayForCpiValuesColumnWise track by $index">
+                                <td>{{arr.index}}%</td>
+                                <td class="text-center" ng-repeat="data in arr.value track by $index">{{data | number : 2}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                   <!--  <p class="text-center" style="word-break: break-all;">{{zipcodeDetails.zipcode}}</p>
+                    
+                    <div class="text-center">
+                        <a style="cursor:pointer;" class="status-change-yes" data-dismiss="modal">Got it!</a>
+                    </div> -->
+                </div>
+            </div><!-- /.modal-content -->
+        </div>
+    </div>
+
+
+
+<script>
+    $( document.body ).on( 'click', '.dropdown-menu li', function( event ) {
+        var selText = $(this).text();
+        $(this).parents('.form-group').find('.dropdown-toggle').html(selText+'<span class="caret"></span>');
+    });
+    function validateQty(event, domCtrl) {
+        // accepts values up to 3 decimals
+        var value = $(domCtrl).val();
+        value = value.split('.');
+        if(value.length === 2 && value[1].length >=3) {
+            return false;
+        }
+        
+        var key = window.event ? event.keyCode : event.which;
+
+        if (event.keyCode == 8 || event.keyCode == 46
+                || event.keyCode == 37 || event.keyCode == 39 || key == 46) {
+            return true;
+        }
+        else if ( key < 48 || key > 57) {
+            return false;
+        }
+        else return true;
+    };
+
+</script>
+
+<style type="text/css">
+    table, th, td {
+    border: 1px solid lightgrey;
+    border-collapse: collapse;
+}
+</style>

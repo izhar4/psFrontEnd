@@ -1,0 +1,20 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /mnt/datastore/nodeuser/frontend_platform
+hooks:
+  ApplicationStop:
+      - location: codeDeployScript/move_config_out.sh
+        runas: root
+      - location: codeDeployScript/deregister_from_elb.sh
+        runas: root
+  ApplicationStart:
+    - location: codeDeployScript/move_config_back.sh
+      runas: root
+    - location: codeDeployScript/runfrontend.sh
+      timeout: 3600
+      runas: root
+    - location: codeDeployScript/register_with_elb.sh
+      runas: root
+

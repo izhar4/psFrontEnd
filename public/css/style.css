@@ -1,0 +1,810 @@
+/***************************** for survey (13 april)*******************/
+.startsurvey{
+  font-size: 26px;
+  color: #5c6b7e;
+  font-family: 'OpenSans-Light';
+  font-weight: 300;
+}
+
+.startsurvey h5{
+  font-size: 26px;
+  margin: .5em 0;
+}
+.field-zip-code{
+  width: 75px;
+}
+.startsurvey input{
+  background: none;
+  border-top:0px transparent;
+  box-shadow: 0 0 0;
+  border-bottom: 1px dotted #dbdbdb;
+  border-right:0px transparent;
+  border-left:0px transparent;
+  -webkit-transition: border-bottom-width .2s false,border-bottom-color .2s false;
+  transition: border-bottom-width .2s,border-bottom-color .2s;
+  color: #4ccead !important;
+}
+.startsurvey input:focus{
+  border-top:0px transparent;
+  box-shadow: 0 0 0;
+  border-bottom: 1px solid #001837;
+  border-right:0px transparent;
+  border-left:0px transparent;
+  outline: none;
+}
+.field-valid{
+  color: #00bf99;
+}
+.field-error{
+  border-bottom: 1px solid #111 !important;
+  color: #111 !important;
+}
+.custom-select-dropdown{
+  min-width: 53px;
+  overflow: hidden;
+  padding: 0 16px 4px 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.startsurvey select{
+  background: none;
+  color: #337ab7;
+  border-top: 0;
+  border-bottom: 1px dotted #99a8bb;
+  border-left:0;
+  border-right:0;
+  outline:0;
+  -moz-appearance: none;
+}
+.startsurvey select:focus{
+  outline: none;
+}
+.field-age, .field-member-age, .feild-kids-age, .field-tax-household{
+  width: 38px;
+}
+.select-kids{
+  width: 40px;
+}
+.field-income{
+  width: 138.75px;
+  text-overflow: ellipsis;
+}
+.self-age, .member-age{
+  display: inline;
+}
+.field-kids-count{
+    margin-right: 10px;
+}
+.select-dropdown {
+  display: inline-block;
+}
+.select-dropdown > a {
+  border-bottom: 1px dotted #5c6b7e;
+  display: block;
+  min-height: 29px;
+  min-width: 50px;
+  padding-right: 10px;
+  color: #4ccead;
+  text-decoration: none;
+}
+.select-dropdown .caret {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+}
+.select-dropdown ul {
+  max-height: 300px;
+  padding: 10px 0;
+  overflow-y: scroll;
+  min-width: 50px;
+}
+.select-dropdown li a {
+  padding-bottom: 5px;
+  padding-top: 5px;
+}
+.select-dropdown li a:hover, .select-dropdown li a:focus, .select-dropdown li a:active {
+  color: #4ccead;
+  background: none;
+}
+.select-info{
+  position: relative;
+}
+.select-info:before{
+  content: "";
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  border-top: 5px solid #000000;
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translate(0,-50%);
+  -webkit-transform: translate(0,-50%);
+  -moz-transform: translate(0,-50%);
+  pointer-events: none;
+}
+
+/**********ng-animations********/
+.covered-if.ng-enter, .covered-if.ng-leave {
+  transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
+}
+.covered-if.ng-enter,
+.covered-if.ng-leave.ng-leave-active {
+  opacity:0;
+}
+.covered-if.ng-leave,
+.covered-if.ng-enter.ng-enter-active {
+  opacity:1;
+}
+
+.field-children{
+    width: 185.75px;
+    text-overflow: ellipsis;
+}
+
+.field-emp{
+    width: 185.75px;
+    text-overflow: ellipsis;
+}
+
+.select-edu{
+    width: 350.75px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.select-relation{
+    width: 180.75px;
+    text-overflow: ellipsis;
+}
+
+.field-month{
+    width: 135.75px;
+    text-overflow: ellipsis;
+}
+.field-year{
+    width: 95px;
+    text-overflow: ellipsis;
+}
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    text-indent: 1px;
+    text-overflow: '';
+}
+
+.select-race {
+    width: 180px;
+}
+
+.select-gender {
+    width: 110px;
+}
+
+.select-age {
+    width: 40px;
+}
+.select-income {
+    width: 100px;
+}
+
+.select-edu {
+    width: 250px;
+}
+
+
+.startsurveyBody {
+    background-color: #ffffff !important;
+
+}
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+    display: none !important;
+}
+
+
+@media only screen and (min-width : 768px) and (max-width : 1024px) and (orientation : landscape) {
+
+    .startsurvey h5{
+        font-size: 30px;
+        margin: .5em 0;
+    }
+
+    .survey h4 {
+        font-size: 32px !important;
+        margin-bottom: 55px;
+        margin-top: 0;
+        color: #465258;
+        padding: 0 15px;
+    }
+    .field-zip-code{
+        width: 120px !important;
+    }
+    .select-race {
+        width: 200px;
+        text-overflow: clip;
+    }
+    .select-gender {
+        width: 150px;
+    }
+
+    .field-month{
+        width: 280px;
+
+    }
+    .field-year{
+        width: 150px;
+    }
+    .select-kids{
+        width: 100px;
+    }
+    .feild-kids-age{
+        width: 80px;
+    }
+
+    .select-income {
+        width: 205px;
+    }
+
+    .field-emp{
+        width: 290px;
+    }
+
+
+    .select-edu{
+        width: 250px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .select-relation{
+        width: 210px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        text-indent: 1px;
+        text-overflow: '';
+    }
+}
+
+
+
+@media only screen and (min-width : 768px) and (max-width : 1024px) and (orientation : portrait) {
+    .startsurvey h5{
+        font-size: 30px;
+        margin: .5em 0;
+    }
+
+    .survey h4 {
+        font-size: 32px !important;
+        margin-bottom: 55px;
+        margin-top: 0;
+        color: #465258;
+        padding: 0 15px;
+    }
+    .field-zip-code{
+        width: 120px !important;
+    }
+    .select-race {
+        width: 200px;
+        text-overflow: clip;
+    }
+    .select-gender {
+        width: 150px;
+    }
+
+    .field-month{
+        width: 280px;
+
+    }
+    .field-year{
+        width: 150px;
+    }
+    .select-kids{
+        width: 100px;
+    }
+    .feild-kids-age{
+        width: 80px;
+    }
+
+    .select-income {
+        width: 205px;
+    }
+
+    .field-emp{
+        width: 290px;
+    }
+
+
+    .select-edu{
+        width: 250px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .select-relation{
+        width: 210px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        text-indent: 1px;
+        text-overflow: '';
+    }
+}
+@media screen and (min-width: 768px) and (max-width: 1024px) and (orientation:landscape) {
+
+    .startsurvey h5{
+        font-size: 26px;
+        margin: .5em 0;
+    }
+    .field-zip-code{
+        width: 90px !important;
+    }
+    .select-race {
+        width: 150px;
+        text-overflow: clip;
+    }
+    .select-gender {
+        width: 95px;
+    }
+
+    .field-month{
+        width: 180px;
+
+    }
+    .field-year{
+        width: 88px;
+    }
+    .select-kids{
+        width: 50px;
+    }
+    .feild-kids-age{
+        width: 40px;
+    }
+
+    .select-income {
+        width: 105px;
+    }
+
+    .field-emp{
+        width: 190px;
+    }
+
+
+    .select-edu{
+        width: 150px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .select-relation{
+        width: 110px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        text-indent: 1px;
+        text-overflow: '';
+    }
+}
+
+@media screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation:portrait) {
+
+
+    .startsurvey h5{
+        font-size: 26px;
+        margin: .5em 0;
+    }
+    .field-zip-code{
+        width: 90px !important;
+    }
+    .select-race {
+        width: 150px;
+        text-overflow: clip;
+    }
+    .select-gender {
+        width: 95px;
+    }
+
+    .field-month{
+        width: 180px;
+
+    }
+    .field-year{
+        width: 88px;
+    }
+    .select-kids{
+        width: 50px;
+    }
+    .feild-kids-age{
+        width: 40px;
+    }
+
+    .select-income {
+        width: 105px;
+    }
+
+    .field-emp{
+        width: 190px;
+    }
+
+
+    .select-edu{
+        width: 150px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .select-relation{
+        width: 110px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        text-indent: 1px;
+        text-overflow: '';
+    }
+}
+
+@media screen and (min-width: 600px) and (max-width: 800px) {
+    .survey h4 {
+        font-size: 26px;
+        margin-bottom: 55px;
+        margin-top: 0;
+        color: #465258;
+        padding: 0 15px;
+    }
+
+    .startsurvey h5{
+        font-size: 22px;
+        margin: .5em 0;
+    }
+    .field-zip-code{
+        width: 70px !important;
+    }
+    .select-race {
+        width: 185px;
+        text-overflow: ellipsis;
+    }
+    .select-gender {
+        width: 100px;
+    }
+
+    .field-month{
+        width: 120px;
+
+    }
+    .field-year{
+        width: 70px;
+    }
+    .select-kids{
+        width: 30px;
+    }
+    .feild-kids-age{
+        width: 30px;
+    }
+
+    .select-income {
+        width: 85px;
+    }
+
+    .field-emp{
+        width: 180px;
+    }
+
+
+    .select-edu{
+        width: 100px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .select-relation{
+        width: 180px;
+        text-overflow: ellipsis;
+    }
+
+
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        text-indent: 1px;
+        text-overflow: '';
+    }
+
+}
+@media screen and (min-width: 480px) and (max-width:640px) {
+
+    .survey h4 {
+        font-size: 26px;
+        margin-bottom: 55px;
+        margin-top: 0;
+        color: #465258;
+        padding: 0 15px;
+    }
+
+    .startsurvey h5{
+        font-size: 22px;
+        margin: .5em 0;
+    }
+    .field-zip-code{
+        width: 70px !important;
+    }
+    .select-race {
+        width: 100px;
+        text-overflow: clip;
+    }
+    .select-gender {
+        width: 75px;
+    }
+
+    .field-month{
+        width: 120px;
+
+    }
+    .field-year{
+        width: 70px;
+    }
+    .select-kids{
+        width: 30px;
+    }
+    .feild-kids-age{
+        width: 30px;
+    }
+
+    .select-income {
+        width: 85px;
+    }
+
+    .field-emp{
+        width: 150px;
+    }
+
+
+    .select-edu{
+        width: 190px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .select-relation{
+        width: 80px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        text-indent: 1px;
+        text-overflow: '';
+    }
+}
+
+
+@media screen and (min-width: 320px) and (max-width:479px) {
+    .startsurvey h5{
+        font-size: 16px;
+        margin: .5em 0;
+    }
+    .field-zip-code{
+        width: 50px !important;
+    }
+    .select-race {
+        width: 70px;
+        text-overflow: clip;
+    }
+    .select-gender {
+        width: 55px;
+    }
+
+    .field-month{
+        width: 91px;
+
+    }
+    .field-year{
+        width: 53px;
+    }
+    .select-kids{
+        width: 25px;
+    }
+    .feild-kids-age{
+        width: 25px;
+    }
+
+    .select-income {
+        width: 65px;
+    }
+
+    .field-emp{
+        width: 90px;
+    }
+
+
+    .select-edu{
+        width: 150px;
+        text-overflow: ellipsis;
+    }
+    .select-relation{
+        width: 80px;
+        text-overflow: ellipsis;
+    }
+
+
+
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        text-indent: 1px;
+        text-overflow: '';
+    }
+
+    .dropdown-menu{ 
+        left: 50%;          
+        transform: translate(-50%,0);           
+        -webkit-transform: translate(-50%,0);           
+        -ms-transform: translate(-50%,0);           
+        -moz-transform: translate(-50%,0);          
+            
+    }
+}
+
+@media screen and (min-width:240px) and (max-width:320px) {
+
+    .survey h4 {
+        font-size: 16px;
+        margin-bottom: 55px;
+        margin-top: 0;
+        color: #465258;
+        padding: 0 15px;
+    }
+    .startsurvey h5{
+        font-size: 16px;
+        margin: .5em 0;
+    }
+    .field-zip-code{
+        width: 50px !important;
+    }
+    .select-race {
+        width: 40px;
+        text-overflow: ellipsis;
+    }
+    .select-gender {
+        width: 40px;
+    }
+
+    .field-month{
+        width: 49px;
+        text-overflow: ellipsis;
+
+    }
+    .field-year{
+        width: 38px;
+        text-overflow: ellipsis;
+    }
+    .select-kids{
+        width: 18px;
+    }
+    .feild-kids-age{
+        width: 15px;
+    }
+
+    .select-income {
+        width: 45px;
+    }
+
+    .field-emp{
+        width: 70px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    .select-edu{
+        width: 120px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .select-relation{
+        width: 80px;
+        text-overflow: ellipsis;
+    }
+
+
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        text-indent: 1px;
+        text-overflow: '';
+    }
+}
+
+.pagination li {
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+/* used for feasibility unused qualification popup. */
+.infoTriangle{
+    color:red !important;
+
+}
+.scrollHide{
+    overflow-x: hidden ;
+}
+.dropdown-toggle::after {
+    display:none
+}
+.supplierUl{
+    height: auto;
+    max-height: 200px;    
+    overflow-x: hidden;
+}
+.suppBtnDrop{
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dspMargin{
+    margin-left: 9px;
+}
+
+.big-checkbox {
+    width: 30px; height: 30px;
+}
+
+.modalText{
+    margin-top: 18px;
+}
+
+.modalPanel{
+    border-style: none;
+}
+
+.decipherQualTab{
+    margin-left: -10px;
+}
+.paddingMapping{
+    padding-top: 10px;
+}
+
+.buttonAlign{
+    width: 150px;  
+    margin-top: 13px;
+}

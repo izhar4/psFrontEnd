@@ -1,0 +1,161 @@
+<!doctype html>
+<html class="no-js" lang="" ng-app="pureSpectrumApp">
+<head>
+    <meta charset="utf-8">
+    <meta content="en" http-equiv="content-language">
+    <!-- <link rel="apple-touch-icon-precomposed" sizes="57x57" href="apple-touch-icon-57x57.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="apple-touch-icon-114x114.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="apple-touch-icon-72x72.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="60x60" href="apple-touch-icon-60x60.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="apple-touch-icon-120x120.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="apple-touch-icon-76x76.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="apple-touch-icon-152x152.png" />
+    <link rel="icon" type="image/png" href="favicon-196x196.png" sizes="196x196" />
+    <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
+    <link rel="icon" type="image/png" href="favicon-128.png" sizes="128x128" /> -->
+    <meta name="application-name" content="&nbsp;"/>
+    <meta name="msapplication-TileColor" content="#FFFFFF" />
+    <meta name="msapplication-TileImage" content="mstile-144x144.png" />
+    <meta name="msapplication-square70x70logo" content="mstile-70x70.png" />
+    <meta name="msapplication-square150x150logo" content="mstile-150x150.png" />
+    <meta name="msapplication-wide310x150logo" content="mstile-310x150.png" />
+    <meta name="msapplication-square310x310logo" content="mstile-310x310.png" />
+
+    <link href="index.html" hreflang="en-us" rel="alternate">
+    <link href="login.html" rel="canonical">
+    <meta content="yes" name="apple-mobile-web-app-capable"><!--[IEMobile]> <meta name="MobileOptimized" content="width"> <![endif]-->
+    <meta content="width=device-width,height=device-height,initial-scale=1.0,maximum-scale=1, user-scalable=no" name="viewport">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title ng-bind="$state.current.data.pageTitle">PureSpectrum</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <link rel="icon" type="image/png" href="img/favicon-196x196.png" sizes="196x196" />
+        <link rel="icon" type="image/png" href="img/favicon-96x96.png" sizes="96x96" />
+        <link rel="icon" type="image/png" href="img/favicon-32x32.png" sizes="32x32" />
+        <link rel="icon" type="image/png" href="img/favicon-16x16.png" sizes="16x16" />
+        <link rel="icon" type="image/png" href="img/favicon-128.png" sizes="128x128" /> -->
+        <!-- Place favicon.ico in the root directory -->
+        <!--<link rel="stylesheet" href="/all.min.css">-->
+        <link rel="stylesheet" href="/styles.min.css">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.2/css/bootstrap2/bootstrap-switch.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/css/jquery.dataTables.min.css">
+       <!--  <link rel="stylesheet" type="text/css" href="http://cloud.github.com/downloads/lafeber/world-flags-sprite/flags16.css" /> -->
+        <link rel="stylesheet" type="text/css" href="//github.com/downloads/lafeber/world-flags-sprite/flags32.css"/>
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/css-toggle-switch/latest/toggle-switch.css" />
+
+        <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.1.2/css/fixedHeader.dataTables.min.css">
+
+        <!-- <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.css"/> -->
+        <link rel="stylesheet" href="/bower_components/bootstrap-daterangepicker/daterangepicker.css"/>
+        <link rel="stylesheet" href="/bower_components/angular-toggle-switch/angular-toggle-switch.css"/>
+        <link rel="stylesheet" href="/bower_components/selectize/dist/css/selectize.default.css ">
+
+        <script>
+            //Add FS tracking code for production and staging
+            var url = window.document.URL;
+            //if (url.indexOf('https://platform.purespectrum.com') !== -1 || url.indexOf('http://platform.purespectrum.com') !== -1) {
+            if (url.indexOf('https://staging.spectrumsurveys.com') !== -1 || url.indexOf('http://staging.spectrumsurveys.com') !== -1) {
+                window['_fs_debug'] = false;
+                window['_fs_host'] = 'fullstory.com';
+                window['_fs_org'] = '744T4';
+                window['_fs_namespace'] = 'FS';
+                (function(m,n,e,t,l,o,g,y){
+                    if (e in m) {if(m.console && m.console.log) { m.console.log('FullStory namespace conflict. Please set window["_fs_namespace"].');} return;}
+                    g=m[e]=function(a,b){g.q?g.q.push([a,b]):g._api(a,b);};g.q=[];
+                    o=n.createElement(t);o.async=1;o.src='https://'+_fs_host+'/s/fs.js';
+                    y=n.getElementsByTagName(t)[0];y.parentNode.insertBefore(o,y);
+                    g.identify=function(i,v){g(l,{uid:i});if(v)g(l,v)};g.setUserVars=function(v){g(l,v)};
+                    g.identifyAccount=function(i,v){o='account';v=v||{};v.acctId=i;g(o,v)};
+                    g.clearUserCookie=function(c,d,i){if(!c || document.cookie.match('fs_uid=[`;`]*`[`;`]*`[`;`]*`')){
+                    d=n.domain;while(1){n.cookie='fs_uid=;domain='+d+
+                    ';path=/;expires='+new Date(0).toUTCString();i=d.indexOf('.');if(i<0)break;d=d.slice(i+1)}}};
+                })(window,document,window['_fs_namespace'],'script','user');
+            }
+        </script>
+
+
+    </head>
+    <body ng-controller="mainCtrl"  class="ng-cloak" ng-class="{startsurveyBody : $state.current.name == 'startsurvey'}">
+	<!------------------ Header ---------------------->
+    <!-- <header  ng-cloak  ng-if="!hdrHide">
+		<div class="container" >
+			<div class="row">
+				<div class="col-xs-12 col-sm-4 col-sm-offset-4 col-md-4 col-md-offset-4">
+					<a class="header-logo" href="#">
+						<img class="img-responsive center-block" src="img/logo.png" alt="Logo" title="" />
+					</a>
+				</div>
+			</div>
+		</div>
+	</header> -->
+
+    <!---------- Header ends ---------------------->
+	<!------------------ Form Section ---------------------->
+    
+    <!-- loading interceptor -->
+    <div class="overlay-div" ng-if="loading">
+        <img ng-class="{'overlay-div-img' : loading}" src="img/logo-without-name.png"/>
+    </div>
+    <!-- loader end -->
+
+    <div  ui-view=""></div>
+	<!------------------ Form Section ends ---------------------->
+	<!------------------ Footer ---------------------->
+	<!--<footer ng-cloak ng-if="!fotrHide" >
+		<div class="container">
+			<div class="row">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<p>All Content &copy; 2015 PureSpectrum&reg; Marketplace Inc. All Rights Reserved.</p>
+				</div>
+			</div>
+		</div>
+	</footer>-->
+	<!------------------ Footer ends ---------------------->
+	<!------------------- script ------------------- -->
+
+
+        <script>window.jQuery || document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.1/jquery.min.js"><\/script>')</script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/js/jquery.dataTables.min.js" type="text/javascript"></script>
+        <script src="datatables-fixedheader.js" type="text/javascript"></script>
+        <script type="text/javascript" src="/bower_components/selectize/dist/js/standalone/selectize.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0/angular.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-datatables/0.5.4/angular-datatables.min.js" type="text/javascript"></script>
+        <script src="angular-datatables-fixedheader.js" type="text/javascript"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.18/angular-ui-router.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-local-storage/0.2.6/angular-local-storage.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.0/angular-cookies.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.7.0/lodash.min.js"></script>
+        <script type="text/javascript" src="bower_components/angular-selectize2/dist/angular-selectize.js"></script>
+        <script src="/lib.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.5/angular-animate.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.2/js/bootstrap-switch.min.js"></script>
+        <script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+ 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.min.js"></script>
+		 <script
+          src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit"
+          async defer
+        ></script>
+        <script src="/node_modules/angular-csv-import/dist/angular-csv-import.min.js"></script>
+
+        <script src="/bower_components/jquery/dist/jquery.js"></script>
+        <script src="/bower_components/angular/angular.js"></script>
+        <script src="/bower_components/moment/moment.js"></script>
+        <script src="/bower_components/bootstrap-daterangepicker/daterangepicker.js"></script>
+        <script src="/bower_components/angular-daterangepicker/js/angular-daterangepicker.js"></script>
+        <script src="/bower_components/angular-toggle-switch/angular-toggle-switch.min.js"></script>
+        <!--Controllers -->
+        <script src="/bower_components/angular-file-saver/dist/angular-file-saver.bundle.js"></script>
+        <script src="/bower_components/angular-contenteditable/angular-contenteditable.js"></script>
+
+    <!--<script src="/allFile.min.js"></script>-->
+    <script src="/app.min.js"></script>
+
+    </body>
+</html>

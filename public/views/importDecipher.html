@@ -1,0 +1,264 @@
+<div ng-controller="decipherCtrl" class="dashbdr_wrapper decipher-wrapper">
+	<header class="dashbboard-header">
+		<div class="col-xs-12 col-sm-6 col-md-6 dash-logo-section">
+			<img class="img-responsive" src="img/logo-without-name.png" alt="Logo" title="" ui-sref="home" />
+			<p><a href="tel:+877865-PURE">(877) 865-PURE</a></p>
+		</div>
+		<div class="col-xs-12 col-sm-4 col-md-4 dashbrd-options pull-right text-right">
+			<a ng-if="showCreate" ui-sref="dynstate({id: 'CreateSurveys' })" ng-click="clearDataFunc()">+ New Survey</a>
+			<div class="dropdown decipherBut" ng-if="showCreate">
+				<button class="btn btn-default dropdown-toggle survey-style" type="button" id="decipherList" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+					<i class="fa fa-angle-down"></i>
+				</button>
+				<ul class="dropdown-menu" aria-labelledby="decipherList">
+					<li class="username"><a ui-sref="decipher">Import From Decipher</a></li>
+				</ul>
+			</div>
+			<div class="dropdown user-options">
+				<button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+					<img class="img-responsive" src="img/dashbrd-header-menu.png" alt="menu" title="" />
+				</button>
+				<ul class="dropdown-menu" aria-labelledby="user-actions">
+					<li class="username">Hello {{userDetail.eml}}</li>
+					<li ng-repeat="link in dsboardLink"> <button type="button" class="btn btn-link" ui-sref="dynstate({id: {{'link.featureKey'}} })" >{{link.featureLabel}}</button></li>
+					<li><a ng-click="resetPassword($event)">Reset Password</a></li>
+					<li><a ng-click="logout($event)">Logout</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="clearfix"></div>
+	</header>
+	<section class="pad">
+		<div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-11 survey">
+                	<h2 class="text-center">Import survey from decipher</h2>
+                    <!--<h4>Create your survey</h4>-->
+                    <form class="create-survey" name="surveyform" autocomplete="off">
+                    	<div class="survey-form">
+                            <div class="form-inline">
+                                <div class="col-xs-12 col-sm-8 col-md-8 form-group decAutoCom" ng-blur="showList = false">
+                                    <!-- <label for="SurveyTitle" >{{'tr_survey_title' | translate}}</label> -->
+                                    <label for="SurveyTitle" >Survey Title</label>
+                                    <input type="text"  class="form-control survey-style width100" name="survey_title" id="SurveyTitle" ng-model="properties.survey_title" ng-change="titleSearch(properties.survey_title)" ng-focus="titleSearch(properties.survey_title)" required/>
+                                    <div class="items" ng-show="showList">
+                                    	<div class="item" ng-click="titleClick(item)" style="cursor:pointer" ng-class="{active:isCurrent($index)}" ng-mouseenter="setCurrent($index)" ng-repeat="item in titleDetail track by $index">
+                                    		{{titleDetail.length > 0 ? item.title : "No Data Found"}}
+                                    	</div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-4 col-md-4 form-group">
+                                    <label>Category</label>
+                                    <div class="dropdown dropdown-scroll">
+                                        <button class="btn btn-default dropdown-toggle survey-style width100" type="button" id="Survey_Sample_Title" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" ng-disabled="manageEdit">
+                                            {{samplesValue || 'Select Category'}}
+                                        </button>
+                                        <ul class="dropdown-menu" style="height: auto; max-height: 200px;    overflow-x: hidden;" aria-labelledby="Survey_Sample_Title">
+                                            <li role="presentation">
+                                              <div class="input-group input-group-sm search-control"> 
+                                              	<span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-search"></span>
+                                                </span>
+                                                <input type="text" class="form-control" placeholder="Search" ng-model="categoryFilter">
+                                              </div>
+                                            </li>
+                                            <li ng-repeat="data in samples | filter:categoryFilter"><a href="" ng-click="setSample(data)">{{data.name}}</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+
+                            <div class="form-inline mar0">
+                                <div class="col-md-5 padlr0">
+                                    <div class="col-xs-6 col-sm-6 col-md-6 form-group country-dropdown">
+                                        <label>Country</label>
+                                        <div class="dropdown dropdown-scroll">
+                                            <button class="btn btn-default dropdown-toggle survey-style width100" type="button" id="Survey_Country" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                            {{countryValue || 'United States'}}
+                                            </button>
+                                            <ul class="dropdown-menu" aria-labelledby="Survey_Country">
+                                                <li role="presentation">
+                                                  <div class="input-group input-group-sm search-control"> <span class="input-group-addon">
+                                                    <span class="glyphicon glyphicon-search"></span>
+                                                    </span>
+                                                    <input type="text" class="form-control" placeholder="Search" ng-model="countryFilter">
+                                                  </div>
+                                                </li>
+                                                <li ng-repeat="data in country | filter:countryFilter"><a href="" ng-click="setCountry($event, data)">{{data.name}}</a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="col-xs-6 col-sm-6 col-md-6 form-group">
+                                        <label>Language</label>
+                                        <div class="dropdown">
+                                            <button class="btn btn-default dropdown-toggle survey-style width100" type="button"  id="languagedrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                                {{languageValue || 'English'}}
+                                            </button>
+                                            <ul class="dropdown-menu" aria-labelledby="languagedrop">
+                                                <li ng-repeat="data in lang"><a href="" ng-click="setLanguage(data.id)">{{data.name}} </a></li>
+                                            </ul>
+                                        </div>                 
+                                    </div>
+                                </div>
+                                <div class="col-md-7 padlr0">
+                                    <div class="col-xs-3 col-sm-3 col-md-3 form-group completes-box">
+                                        <label for="completes">Completes</label>
+                                        <input type="text" max="99999" ng-keypress="tabbing($event, 'languagedrop','LengthofSurvey');" onkeypress='return validateCompletes(event);' class="form-control survey-style width110" id="completes" name="numberOfCompletes"  ng-model="properties.completes_required" required="" ng-model-options="{ updateOn: 'default change blur', debounce: {default:200, blur:0, change:0} }" maxlength="5" ng-keyup="getCpi()" ng-blur="getCpi()">
+                                        <span ng-if="totalFielded >= 0">Fielded: {{totalFielded}}</span>  
+                                    </div>
+                                   
+                                    <div class="col-xs-3 col-sm-3 col-md-3 form-group place_holder">
+                                        <label>Length of <br> Survey</label> <!-- PD-657 -->
+                                        <input type="text" max="99" maxlength="2" onkeypress='return validateCompletes(event);' class="form-control survey-style width100" name="lengthOfSurvey" id="LengthofSurvey"  ng-model="properties.expected_loi" required="" ng-keypress="tabbing($event,'completes','incidence');" ng-readonly="manageEdit" ng-keyup="getCpi()" ng-blur="getCpi()">
+                                        <span>mins</span>
+                                  
+                                    </div>
+                                   
+                                    <div class="col-xs-3 col-sm-3 col-md-3 form-group place_holder">
+                                       <label>Incidence</label>
+                                      <input type="text" id="incidence" ng-keypress="tabbing($event,'LengthofSurvey', '#genderModal');"  maxlength="2" onkeypress='return validateCompletes(event);' class="form-control survey-style width100" name="incidence" ng-model="properties.expected_ir" data-toggle="tooltip" title="incidence is the percent of survey takers that qualify in the survey after meeting all the audience targeting criteria and quotas below" ng-keyup="getCpi()" ng-blur="getCpi()">
+                                       <span>%</span>   
+                                    </div>
+                                    <div class="col-xs-3 col-sm-3 col-md-3 form-group place_holder">
+                                        <label for="field_time">FIELD TIME</label>
+                                        <input type="number" id="field_time" name="" class="form-control border-less-input survey-style width100" style="" maxlength="3" ng-model="properties.field_time" onkeypress='return validateCompletes(event, this);' ng-keypress="tabbing($event,'completes','gender_qmodel');" ng-keyup="getCpi()" ng-blur="getCpi()">
+                                        <span>days</span>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+
+                            <div class="form-inline" ng-show="!showQuota && showMap">
+                            	<h3 class="text-center" style="margin-bottom: 20px; margin-top: 70px;">Conditions Mapping</h3>
+                            	<div ng-repeat="qual in definesForView" style="margin-bottom: 25px;">
+	                                <div class="col-md-3">
+	                                    <div class="form-group">
+	                                    	<label for="decipherId" >Decipher Question Id</label>
+	                                    	<div class="inputLookLike">{{qual.deciQual}}</div>
+	                                    </div>
+	                                </div>
+	                                <div class="col-md-6">
+	                                    <label for="decipherId">Pure Spectrum Qualification</label>
+	                                    <div class="inputLookLike">{{qual.psQualName}}</div>
+	                                	<!-- <input type="text"  class="form-control survey-style width100" name="decipherId" id="decipherId" ng-model="qual.psQualName" required/> -->
+	                                </div>
+	                                <div class="col-md-3">
+	                                    <label for="decipherId" >Condition Mapping</label>
+	                                    <div class="condMapArr">
+	                                    	<a ng-click="openMappingModal(qual)" data-target="#mappingModal" data-toggle="modal"><i class="fa fa-angle-right" aria-hidden="true"></i></a>
+	                                    	<input type="checkbox" ng-checked="qual.isChecked" ng-click="uncheckQual(qual)" />
+	                                    </div>
+	                                </div>
+	                                <div class="clearfix"></div>
+	                            </div>
+	                            <button class="btn btn-primary pull-right submit-btn" ng-click="showQuotaView()">Next</button>
+	                            <div class="clearfix"></div>
+                            </div>
+
+                            <div class="form-inline" ng-show="showQuota">
+                            	<h3 class="text-center" style="margin-bottom: 20px; margin-top: 70px;">Quotas</h3>
+	                            <table class="table decipher-quota">
+	                            	<thead>
+	                            		<tr>
+	                            			<th>Marker ID</th>
+	                            			<th>Quota</th>
+	                            			<th>Goal</th>
+	                            			<!-- <th>Current Target</th> -->
+	                            		</tr>
+	                            	</thead>
+	                            	<tbody>
+	                            		<tr ng-repeat="item in defines">
+	                            			<td>
+	                            				{{item.markerKey}}
+	                            				<!-- <a ng-click="lockQuota(item); avoidClick($event)" class="lockQuotasIcon"><img ng-src="{{item.locked == true ? lockQuotaImg:unLockQuotaImg}}" alt="lock_quota" class="img-responsive" /></a> -->
+	                            			</td>
+	                            			<td>{{item.value}}</td>
+	                            			<td>{{item.goal}}</td>
+	                            			<!-- <td>{{item.current_target}}</td> -->
+	                            		</tr>
+	                            	</tbody>
+	                            </table>
+	                            <button class="btn btn-primary pull-left submit-btn" ng-click="showQuota = !showQuota">Back to Conditions</button>
+	                            <button class="btn btn-primary pull-right submit-btn" ng-click="saveSurvey()">Confirm Quotas</button>
+	                            <div class="clearfix"></div>
+	                        </div>
+
+                        </div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<div class="modal fade" id="mappingModal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" >
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" ng-click="clearModalData()">&times;</button>
+                    <h4 class="modal-title">Conditions Mapping</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group"> 
+                        <table class="table text-center">
+                        	<thead>
+                        		<tr>
+	                        		<th>Decipher Qualifcation Code</th>
+	                        		<th>Decipher Condition Code</th>
+	                        		<th>Ps Qualification Name</th>
+	                        		<th>Ps Condition Code</th>
+	                        		<th>Ps Condition Name</th>
+	                        	</tr>
+                        	</thead>
+                        	<tbody>
+                        		<tr ng-repeat="item in decModalData.conditions">
+	                        		<td>{{decModalData.deciQual}}</td>
+	                        		<td>{{item.deciCondCode}}</td>
+	                        		<td style="text-transform: capitalize;">{{decModalData.psQualName}}</td>
+	                        		<td>{{item.psCondCode}}</td>
+	                        		<td>{{item.value}}</td>
+	                        	</tr>
+                        	</tbody>
+                       	</table>
+                    </div>
+                </div>
+                <!-- <div class="modal-footer">
+                </div> -->
+            </div>
+        </div>
+    </div>
+    <!-- loader -->
+	<div class="overlay-div" ng-show="loader.show">
+	    <div id="loader-wrapper">
+	        <div id="loader"><span></span></div>
+	    </div>
+	</div>
+    <script>
+	    /*==== validate freactional value on create survey
+	    */
+	    function validateCompletes(event){ 
+	        var key = window.event ? event.keyCode : event.which;
+	        if (event.keyCode == 8 
+	            || event.keyCode == 37 || event.keyCode == 39) {
+	            return true;
+	        }else if ( event.keyCode == 46 || key < 48 || key > 57) {
+	            return false;
+	        }else {
+	            return true;
+	        }
+	    };
+
+	    $('.dropdown').keydown(function(e){
+	        if(e.which == 9){ // tab
+	            e.preventDefault();
+	            $(this).parent().find('.dropdown-toggle').click();
+	            $(this).parent().find('.dropdown-menu a:first').focus();
+	        }
+	    });
+	    $('.dropdown-menu input, .dropdown-menu .search-control').click(function(e) {
+	        e.stopPropagation();
+	    });
+	</script>
+</div>

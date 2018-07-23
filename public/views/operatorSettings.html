@@ -1,0 +1,356 @@
+<div ng-controller="operatorSettingCtrl">
+    <header class="dashbboard-header">
+        <div class="col-xs-12 col-sm-6 col-md-6 dash-logo-section">
+            <img class="img-responsive" src="img/logo-without-name.png" alt="Logo" title="" ui-sref="home" />
+            <p><a href="tel:+877865-PURE">(877) 865-PURE</a></p>
+        </div>
+        <div class="col-xs-12 col-sm-4 col-md-4 dashbrd-options pull-right text-right">
+            <a ng-if="showCreate" ui-sref="dynstate({id: 'CreateSurveys' })">+ New Survey</a>
+            <div class="dropdown user-options">
+                <button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <img class="img-responsive" src="img/dashbrd-header-menu.png" alt="menu" title="" />
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="user-actions">
+                    <li class="username">Hello {{ userEmail }}</li>
+                    <li ng-repeat="link in dsboardLink"> <button type="button" class="btn btn-link" ui-sref="dynstate({id: {{'link.featureKey'}} })" >{{ link.featureLabel }}</button></li>
+                    <li><a ng-click="resetPassword()">Reset Password</a></li>
+                    <li><a ng-click="logout()">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </header>
+    <div class="container">
+        <section>
+            <div class="col-xs-12 col-sm-12 col-md-10 col-md-offset-1">
+                <h4 style="font-size:32px;color: #465258;font-family: opensans-light;margin-top:130px">Operator Settings</h4>
+            </div>
+            <div class="col-md-14 dashbrd-survey-table table-responsive scrollHide ">
+                <div class="survey-detail-tabs" >
+                    <ul class="nav nav-tabs custom-tabs" role="tablist">
+                        <li ng-class="{ active: isSet(1) }">
+                            <a href ng-click="setTab(1)">Manage Feasibility</a>
+                        </li>
+                        <li ng-class="{ active: isSet(2) }">
+                            <a href ng-click="setTab(2)">Margin Settings</a>
+                        </li>
+                        <li ng-class="{ active: isSet(3) }">
+                            <a href ng-click="setTab(3)">Suppliers Settings</a>
+                        </li>
+                        <li ng-class="{ active: isSet(4) }">
+                            <a href ng-click="setTab(4)">Currency Settings</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div ng-show="isSet(1)" class="supplier-tabs feasMgnBtm350">
+                    <div class="row  feasMgnTp5">
+                        <!-- PD-1372 -->
+                        <div class="col-md-3 col-sm-3">
+                            <div class="row">
+                                <div class="form-group">
+                                    <label  class="col-md-3 col-sm-3 control-label text-left feasFnt marginSuplier marginSupplieripad">Suppliers</label>
+                                    <div class="col-md-6 col-sm-6 marginSupplierDrop marginSupplierDropipad dropdown dropdown-scroll">
+                                        <button class="btn btn-default dropdown-toggle suppBtnDrop" type="button"  data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" >
+                                            {{ name ||'Select Supplier'}}
+                                        </button>
+                                        <ul class="dropdown-menu supplierUl">
+                                            <li role="presentation">
+                                                <div class="input-group input-group-sm search-control"> 
+                                                   <span class="input-group-addon">
+                                                      <span class="glyphicon glyphicon-search"></span>
+                                                    </span>
+                                                    <input type="text" class="form-control" placeholder="Search" ng-model="supplierFilter"></input>
+                                                </div>
+                                            </li>
+                                            <li ng-repeat="opt in suppliers | filter:supplierFilter">
+                                                <a href=""  ng-click="selctSupplier(opt.value)">{{opt.label}}</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PD-1372 added css classes-->
+                        <!--  Country is the top selector, country > language > Feasibility type -->
+                        <!--   country -->
+                        <div class="col-md-4 col-sm-4">
+                           <div class="row">
+                               <div class="form-group">
+                                   <label class="col-sm-2 col-md-2 col-md-offset-1 control-label feasFnt marginCountry marginCountryipad">Country</label>
+                                   <div class="col-md-6 col-sm-6 marginCountryDrop marginCountryDropipad">
+                                       <select class="form-control text-center" ng-change="selectCountry(feasibilityObj.surveyLocalization.feasCountry)"  ng-options="opt.value as opt.label for opt in feasCountry" ng-change="validateField()" ng-model="feasibilityObj.surveyLocalization.feasCountry" ng-show="!feasibilityObj.surveyLocalization.feasCountry" ng-disabled="enableFeasibilityEst">
+                                           <option style="display:none" value="">Select Country</option>
+                                       </select>
+
+                                       <select class="form-control text-center" ng-change="selectCountry(feasibilityObj.surveyLocalization.feasCountry)"  ng-options="opt.value as opt.label for opt in feasCountry" ng-change="validateField()" ng-model="feasibilityObj.surveyLocalization.feasCountry"  ng-if="feasibilityObj.surveyLocalization.feasCountry" ng-init="selectCountry(feasibilityObj.surveyLocalization.feasCountry)" ng-disabled="enableFeasibilityEst" >
+                                           <option style="display:none" value="">Select Country</option>
+                                       </select>
+                                   </div>
+                               </div>
+                           </div>
+                        </div>
+                        <!-- PD-1372 added css classes-->
+                        <!-- language -->
+                        <div class="col-md-3 col-sm-3">
+                            <div class="row">
+                                <div class="form-group">
+                                    <label class="col-sm-3 col-md-3 col-md-offset-1 control-label feasFnt marginLang marginLangipad">Language</label>
+                                    <div class="col-md-6 col-sm-6 marginLangDrop marginLangDropipad">
+                                        <select required="true" class="form-control text-center" ng-change="selectLanguage(feasibilityObj.surveyLocalization.feasLng)" ng-options="opt.value as opt.label for opt in feasLngByCountry" ng-change="validateField()" ng-model="feasibilityObj.surveyLocalization.feasLng" ng-disabled="countryNotSelected">
+                                            <option style="display:none" value="">Select Language</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- PD-1372 added css classes  -->
+                        <!-- feasibility Type -->
+                        <div class="col-md-2 col-sm-2">
+                            <div class="row">
+                                <div class="form-group">
+                                    <label class="col-sm-5 col-md-5 col-md-offset-1 control-label feasFnt marginFeas marginFeasLabelipad">Feasibility Estimate</label>
+                                    <div class="col-md-6 col-sm-6 marginFeasDrop marginFeasDropipad">
+                                        <select class="form-control text-center" ng-change="changeFeasibility(feasibilityObj.genpopMode)" ng-options="opt.value as opt.label for opt in feasibilityModes" ng-model="feasibilityObj.genpopMode" ng-disabled="enableFeasibilityEst || countryNotSelected || langNotSelected">
+                                            <option style="display:none" value="">Select Feasibility</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <br>
+                        <br>
+                        <!-- PD-1372 -->
+                        <div ng-show="isGenipopMode && !countryNotSelected && !langNotSelected">
+                            <div class="row">
+                                <div class="form-group">
+                                    <label class="col-sm-3 col-md-3 col-md-offset-1 control-label feasFnt labelFeasOptions marginMobileLabelFeasOpt marginfeasoption1Label">Desktop Monthly Active Users</label>
+                                    <div class="col-md-6 col-sm-6">
+                                        <input required="true" type="number" min="0" oninput="validity.valid||(value='');" class="form-control labelFeasInput marginMobilelabelFeasInput marginfeasoption1Input" id="" ng-model="feasibilityObj.desktopMonthlyActUsr" ng-change="validateField()" placeholder="Desktop Monthly Active Users" value="{{suppSetObj.monthlyActUsr}}">
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label class="col-sm-5 col-md-5 col-md-offset-1 control-label feasFnt labelFeasOptions marginMobileLabelFeasOpt marginfeasoption2Label">Mobile Monthly Active Users</label>
+                                    <div class="col-md-6 col-sm-6">
+                                        <input required="true" type="number" min="0" oninput="validity.valid||(value='');" class="form-control labelFeasInput marginMobilelabelFeasInput marginFeasInputipad" id="" ng-model="feasibilityObj.mobileMonthlyActUsr" ng-change="validateField()" placeholder="Mobile Monthly Active Users" value="{{suppSetObj.monthlyActUsr}}">
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label class=" col-sm-5 col-md-5 col-md-offset-1 control-label feasFnt labelFeasOptions marginMobileLabelFeasOpt marginfeasoption3Label">Partner Delivery Multiplier</label>
+                                    <div class="col-md-6 col-sm-6">
+                                        <input required="true" type="number" min="0" step="any" oninput="validity.valid||(value='');" class="form-control labelFeasInput marginMobilelabelFeasInput"
+                                               ng-model="feasibilityObj.patnrDelvryMulplr" placeholder="Partner Delivery Multiplier" ng-change="validateField()" value="{{suppSetObj.monthlyActUsr}}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class=" row"><!-- panel-footer -->
+                            <div class="col-xs-6 text-left">
+                                <div class="previous">
+                                    <input type="button"  ui-sref="home" href="#/dashboard" class="btn btn-primary feasSavBtn marginBackBtn marginBackmobile marginBackbtnipad" value="Back to Dashboard">
+                                </div>
+                            </div>
+                            <div class="col-xs-6 text-right">
+                                <div class="next">
+                                    <input type="button"  class="btn btn-primary center-block  feasSavBtn marginSaveBtn" ng-click="saveFeasibility()" ng-disabled="detectedEmptyFld" value="Save" ng-show="enableSaveBtn">
+                                </div>
+                            </div>
+                        </div><!-- end panel-footer -->
+                    </div>
+                </div>
+
+                <div ng-show="isSet(2)" class="supplier-tabs feasMgnBtm350">
+                    <div class="row survey-form">
+                        <div class="col-xs-12 col-sm-12 col-md-11 survey">
+                            <div class="form-inline mar0">
+                                <!-- Buyer select -->
+                                <div class="col-sm-6 col-md-4 form-group">
+                                    <label>Buyer</label>
+                                    <div class="dropdown dropdown-scroll">
+                                        <button class="btn btn-default dropdown-toggle survey-style width100" type="button" id="select_buyer" data-toggle="dropdown" aria-haspopup="true" ng-init="getPricingMargin(selectedBuyer.id, selectedSupplier.value)"  aria-expanded="true" style="width: 100%;text-align: left;">
+                                            {{ selectedBuyer.name }}
+                                        </button>
+                                        <ul class="dropdown-menu company_search" aria-labelledby="select_buyer" style="height: auto; max-height: 250px;    overflow-x: hidden;" >
+                                            <li role="presentation">
+                                                <div class="input-group input-group-sm search-control">
+                                                    <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
+                                                    <input type="text" class="form-control" placeholder="Search" ng-model="buyerFilter">
+                                                </div>
+                                            </li>
+                                            <li><a href="" ng-click="selectBuyer('all'); getPricingMargin(selectedBuyer.id, selectedSupplier.value)">All</a></li>
+                                            <li role="separator" class="divider"></li>
+                                            <li ng-repeat="buyer in buyers | filter:buyerFilter"><a href="" ng-click="selectBuyer(buyer); getPricingMargin(selectedBuyer.id, selectedSupplier.value)">{{buyer.name}}</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <!-- supplier select -->
+                                <div class="col-sm-6 col-md-4 form-group">
+                                    <label>Supplier</label>
+                                    <div class="dropdown dropdown-scroll">
+                                        <button class="btn btn-default dropdown-toggle survey-style width100" type="button" id="select_supplier" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                            {{ selectedSupplier.label }}
+                                        </button>
+                                        <ul class="dropdown-menu company_search" aria-labelledby="select_supplier" style="height: auto; max-height: 250px;    overflow-x: hidden;">
+                                            <li role="presentation">
+                                                <div class="input-group input-group-sm search-control">
+                                                    <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
+                                                    <input type="text" class="form-control" placeholder="Search" ng-model="supplierFilter">
+                                                </div>
+                                            </li>
+                                            <li><a href="" ng-click="selectSupplier('all'); getPricingMargin(selectedBuyer.id, selectedSupplier.value)">All</a></li>
+                                            <li role="separator" class="divider"></li>
+                                            <li ng-repeat="supplier in suppliers | filter:supplierFilter"><a href="" ng-click="selectSupplier(supplier); getPricingMargin(selectedBuyer.id, selectedSupplier.value)">{{supplier.label}}</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <!-- Margin box -->
+                                <div class="col-sm-6 col-md-2 form-group">
+                                    <label>Margin</label>
+                                    <input type="number" class="survey-style width100" name="margin" ng-model = "margin">
+                                </div>
+                                <div class="col-sm-6 col-md-2 form-group" style="margin-top: 26px;">
+                                    <button type="submit" class="btn btn-default survey-style submit-btn" ng-click="savePricingMargin()">Submit</button>
+                                </div>
+                            </div>
+                            <script type="text/javascript">
+                                $('.dropdown-menu input, .dropdown-menu .search-control').click(function(e) {
+                                    e.stopPropagation();
+                                });
+                            </script>
+                        </div>
+                    </div>
+                    <div class=" row">
+                        <div class="col-xs-6 text-left">
+                            <div class="previous">
+                                <input type="button"  ui-sref="home" href="#/dashboard" class="btn btn-primary feasSavBtn marginBackBtn marginBackmobile marginBackbtnipad" value="Back to Dashboard">
+                            </div>
+                        </div>
+                        <div class="col-xs-6 text-right">
+                            <div class="next">
+                                <input type="button"  class="btn btn-primary center-block  feasSavBtn marginSaveBtn" ng-click="saveFeasibility()" ng-disabled="detectedEmptyFld" value="Save" ng-show="enableSaveBtn">
+                            </div>
+                        </div>
+                    </div><!-- end panel-footer -->
+                </div>
+
+                <!-- PD-1393 -->
+                <div ng-show="isSet(3)" class="supplier-tabs feasMgnBtm350">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-11 col-md-8 survey">
+                                <table style="width:100%;">
+                                    <thead>
+                                    <th>Name</th>
+                                    <th>Supplier Type</th>
+                                    </thead>
+                                    <tbody>
+                                    <!-- make Manage Suppliers underline and selectable row -->
+                                    <tr ng-repeat="supplier in suppliers">
+                                        <td>{{supplier.label}}</td>
+                                        <td class="deprcateSwitch">
+                                            <toggle-switch class="toggle-switch" ng-model="supplier.supplerType" on-label="Private" off-label="Public" ng-click="updateSupplierType(supplier)"><toggle-switch>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class=" row"><!-- panel-footer -->
+                        <div class="col-xs-6 text-left">
+                            <div class="previous">
+                                <input type="button"  ui-sref="home" href="#/dashboard" class="btn btn-primary feasSavBtn marginBackBtn marginBackmobile marginBackbtnipad" value="Back to Dashboard">
+                            </div>
+                        </div>
+                        <div class="col-xs-6 text-right">
+                            <div class="next">
+                                <input type="button"  class="btn btn-primary center-block  feasSavBtn marginSaveBtn" ng-click="saveFeasibility()" ng-disabled="detectedEmptyFld" value="Save" ng-show="enableSaveBtn">
+                            </div>
+                        </div>
+                    </div><!-- end panel-footer -->
+                </div>
+
+                <div ng-show="isSet(4)" class="supplier-tabs feasMgnBtm350">
+                    <div class="row survey-form">
+                        <div class="col-xs-12 col-sm-12 col-md-11 survey">
+                            <div class="form-inline mar0">
+                                <div class="col-sm-6 col-md-4 form-group">
+                                    <label>Currencies</label>
+                                    <div class="dropdown dropdown-scroll">
+                                        <button class="btn btn-default dropdown-toggle survey-style width100" type="button" id="select_currency" data-toggle="dropdown" aria-haspopup="true"  aria-expanded="true" style="width: 100%;text-align: left;">
+                                            {{ selectedCurrency.name || currencyPlaceholder }}
+                                        </button>
+                                        <ul class="dropdown-menu company_search" aria-labelledby="select_currency" style="height: auto; max-height: 250px;    overflow-x: hidden;" >
+                                            <li role="presentation">
+                                                <div class="input-group input-group-sm search-control">
+                                                    <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
+                                                    <input type="text" class="form-control" placeholder="Search" ng-model="currencyFilter">
+                                                </div>
+                                            </li>
+                                            <li ng-repeat="currency in currencies | filter:currencyFilter">
+                                                <a href="" ng-click="selectCurrency(currency);">{{ currency.name }}</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+
+                                <div class="col-sm-6 col-md-3 form-group">
+                                    <label for="fx">Currency Code (fx)</label>
+                                    <input type="number" class="survey-style width100" id="fx" name="fx" ng-model="selectedCurrency.fx">
+                                </div>
+                                <div class="col-sm-6 col-md-3 form-group">
+                                    <label for="CRRate" style="text-transform: none;">CRRate</label>
+                                    <input type="number" class="survey-style width100" name="CRRate" ng-model="selectedCurrency.CRRate" id="CRRate">
+                                </div>
+                                <div class="col-sm-6 col-md-2 form-group">
+                                    <label for="symbol" style="text-transform: none;">Currency Symbol</label>
+                                    <input type="text" class="survey-style width100" name="symbol" ng-model="selectedCurrency.symbol" id="symbol">
+                                </div>
+                            </div>
+                            <script type="text/javascript">
+                                $('.dropdown-menu input, .dropdown-menu .search-control').click(function(e) {
+                                    e.stopPropagation();
+                                });
+                            </script>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12" style="margin-top: 26px; text-align: center">
+                                <button type="submit" class="btn btn-default survey-style submit-btn" ng-disabled="!selectedCurrency.currencyShortCode" ng-click="saveCurrency()">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class=" row">
+                        <div class="col-xs-6 text-left">
+                            <div class="previous">
+                                <input type="button"  ui-sref="home" href="#/dashboard" class="btn btn-primary feasSavBtn marginBackBtn marginBackmobile marginBackbtnipad" value="Back to Dashboard">
+                            </div>
+                        </div>
+                        <div class="col-xs-6 text-right">
+                            <div class="next">
+                                <input type="button"  class="btn btn-primary center-block  feasSavBtn marginSaveBtn" ng-click="saveFeasibility()" ng-disabled="detectedEmptyFld" value="Save" ng-show="enableSaveBtn">
+                            </div>
+                        </div>
+                    </div><!-- end panel-footer -->
+                </div>
+            </div>
+        </section>
+        <br><br><br>
+    </div>
+    <!-- loader -->
+    <div class="overlay-div" ng-if="loader.show">
+        <div id="loader-wrapper">
+            <div id="loader"><span></span></div>
+        </div>
+    </div>
+</div>

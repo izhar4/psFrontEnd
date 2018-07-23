@@ -1,0 +1,237 @@
+<div ng-controller="advQuestionCtrl">
+    <header class="dashbboard-header">
+        <div class="col-xs-12 col-sm-6 col-md-6 dash-logo-section">
+            <img class="img-responsive" src="img/logo-without-name.png" alt="Logo" title="" ui-sref="home" />
+            <p><a href="tel:+877865-PURE">(877) 865-PURE</a></p>
+        </div>
+        <div class="col-xs-12 col-sm-4 col-md-4 dashbrd-options pull-right text-right">
+            <a ng-if="showCreate" ui-sref="dynstate({id: 'CreateSurveys' })">+ New Survey</a>
+            <div class="dropdown user-options">
+                <button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <img class="img-responsive" src="img/dashbrd-header-menu.png" alt="menu" title="" />
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="user-actions">
+                    <li class="username">Hello {{userEmail}}</li>
+                    <li ng-repeat="link in dsboardLink"> <button type="button" class="btn btn-link" ui-sref="dynstate({id: {{'link.featureKey'}} })" >{{link.featureLabel}}</button></li>
+                    <li><a ui-sref="resetPassword">Reset Password</a></li>
+                    <li><a ng-click="logout()">Logout</a></li>
+                 </ul>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </header>
+    <section class="editAdvQuestions pad" ng-if="modes.view">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 text-right" style="margin:20px 0px;">
+                    <button type="button" class="btn btn-default submit-btn" ng-if="modes.view" ng-click="goToAddMode()">Add Question</button>
+                </div>
+                <div class="col-sm-4">
+                    <div class="question-inner" ng-class="{'is-active':activeMenu == question.respondent_question_id}" ng-repeat="question in questions">
+                        <a style="cursor:pointer;" ng-click="viewAdvQuesDetails(question)">{{question.question_description}}</a>
+                        <div>
+                            <a ng-click="goToEditMode(); editAdvQues(question);"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
+                            <a ng-click="deleteAdvQuestion(question.respondent_question_id)"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                        </div>
+                        
+                    </div>
+                    <div>
+                        <nav aria-label="Page navigation example">
+                          <ul class="pagination" ng-repeat="pageNum in pages">
+                            <!-- <li class="page-item"><a class="page-link" href="#">Previous</a></li> -->
+                            <li class="page-item" ng-class="{ active: pageNum == page }"><a class="page-link" ng-click="getAdvTargetingQues(pageNum)">{{pageNum}}<span class="sr-only">(current)</span></a></li>
+                            <!-- <li class="page-item"><a class="page-link" href="#">Next</a></li> -->
+                          </ul>
+                        </nav>
+                    </div>
+                </div>
+                <div class="col-sm-7 pull-right">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fields</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Company</td><td>{{advQuesDetails.cmp_name}}</td>
+                            </tr>
+                            <tr>
+                                <td>Class</td><td>{{advQuesDetails.class_name}}</td>
+                            </tr>
+                            <tr>
+                                <td>Respondent Question Id</td><td>{{advQuesDetails.respondent_question_id}}</td>
+                            </tr>
+                            <tr>
+                                <td>Question Description</td><td>{{advQuesDetails.question_description}}</td>
+                            </tr>
+                            <tr>
+                                <td>Question Category</td><td>{{advQuesDetails.question_category | convertArrToStr}} </td>
+                            </tr>
+                            <tr>
+                                <td>Stem 1</td><td>{{advQuesDetails.stem1}}</td>
+                            </tr>
+                            <tr>
+                                <td>Stem 2</td><td>{{advQuesDetails.stem2}}</td>
+                            </tr>
+                            <tr>
+                                <td>Question Buyer Text</td><td>{{advQuesDetails.buyer_text}}</td>
+                            </tr>
+                            <tr>
+                                <td>Question Screener Text</td><td>{{advQuesDetails.screener_text}}</td>
+                            </tr>
+                            <tr>
+                                <td>Question Order in Screener</td><td>{{advQuesDetails.order}}</td>
+                            </tr>
+                            <tr>
+                                <td>Question Type</td><td>{{advQuesDetails.question_type}}</td>
+                            </tr>
+                            <tr>
+                                <td>Placeholder</td><td>{{advQuesDetails.placeholder}}</td>
+                            </tr>
+                            <tr>
+                                <td>Answers</td><td>{{advQuesDetails.answers}}</td>
+                            </tr>
+                            <tr>
+                                <td>Units</td><td>{{advQuesDetails.units}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </section>
+    <section class="addAdvQuestions pad" ng-if="modes.add || modes.edit">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 text-left">
+                    <button type="button" class="btn btn-default submit-btn" ng-if="modes.add || modes.edit" ng-click="goToViewMode()"><i class="fa fa-angle-left" aria-hidden="true"></i> Back To All Questions</button>
+                </div>
+                <form class="form-horizontal col-sm-8 col-md-8 col-lg-8 survey">
+                    <h4 class="text-center"><span ng-if="modes.add">Add</span><span ng-if="modes.edit">Edit</span> Advance Questions</h4>
+
+                    <!-- company select -->
+                    <div class="form-group">
+                        <label>Select Company<span>*</span></label>
+                        <div class="dropdown dropdown-scroll">
+                            <button class="btn btn-default dropdown-toggle survey-style width100" type="button" id="Survey_Country" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="width: 100%;text-align: left;">
+                            {{selectedCompany.name}}
+                            </button>
+                            <ul class="dropdown-menu company_search" aria-labelledby="Survey_Country">
+                                <li role="presentation">
+                                  <div class="input-group input-group-sm search-control"> <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-search"></span>
+                                    </span>
+                                    <input type="text" class="form-control" placeholder="Search" ng-model="compnyFilter"></input>
+                                  </div>
+                                </li>
+                                <li><a href="" ng-click="selectCompany('all')">All</a></li>
+                                <li role="separator" class="divider"></li>
+                                
+                                <li ng-repeat="cmp in cmpList | filter:compnyFilter"><a href="" ng-click="selectCompany(cmp)">{{cmp.name}}</a></li>
+                            </ul>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <!-- <div class="form-group">
+                        <label for="qualification_id">Qualification Id<br/>
+                        </label>
+                        <input type="text" class="form-control" id="qualification_id" placeholder="Qualification Id" ng-model="advQuestion.qualification_id">
+                    </div> -->
+                    <div class="form-group">
+                        <label for="class">Class<span>*</span>
+                        </label>
+                        <select class="form-control" ng-model="advQuestion.class">
+                            <option value = "2">Extended</option>
+                            <option value = "3">Custom</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Question Description<span>*</span></label>
+                        <input type="text" class="form-control" id="description" placeholder="Question Description" ng-model="advQuestion.question_description">
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Question Category<span>*</span><br/>
+                        <p>Category should be separated by comma</p>
+                        </label>
+                        <input type="text" class="form-control" id="category" placeholder="Question Category" ng-model="advQuestion.question_category" ng-list>
+                    </div>
+                    <div class="form-group">
+                        <label for="stem1">Stem 1<span>*</span><br/>
+                        <p>Qualification Format : "%%respId%%"</p>
+                        </label>
+                        <input type="text" class="form-control" id="stem1" placeholder="Stem 1" ng-model="advQuestion.stem1">
+                    </div>
+                    <div class="form-group">
+                        <label for="stem2">Stem 2</label>
+                        <input type="text" class="form-control" id="stem2" placeholder="Stem 2" ng-model="advQuestion.stem2">
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Question Buyer Text<span>*</span><br/>
+                        <p>Qualification Format : "%%respId%%"</p></label>
+                        <input type="text" class="form-control" id="category" placeholder="Question Category" ng-model="advQuestion.buyer_text">
+                    </div>
+                    <div class="form-group">
+                        <label for="quesType">Question Type<span>*</span>
+                        </label>
+                        <select class="form-control" ng-model="advQuestion.question_type" ng-change="changeMode(advQuestion.question_type)">
+                            <option value="singlepunch">Single Punch</option>
+                            <option value="multipunch">Multi Punch</option>
+                            <option value="range">Range</option>
+                        </select>
+                    </div>
+                    <div class="form-group" ng-if="rangeMode">
+                        <label for="units">Units<span>*</span></label>
+                        <select class="form-control" ng-model="advQuestion.units"  ng-options="unit.id as unit.name for unit in units">
+                        </select>
+                    </div>
+                    <div class="form-group" add-adv-answer  adv-question-arr= 'advQuestion.options' , locale-ques="addedOptions" countries="countries" range-mode = "rangeMode">
+                    </div>
+                    <button type="submit" class="btn btn-default submit-btn" ng-click="saveAdvQuestion()" ng-if="modes.add">Add Question</button>
+                    <button type="submit" class="btn btn-default submit-btn" ng-click="updateAdvQuestion()" ng-if="modes.edit">Save Question</button>
+                </form>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $('.dropdown-menu input, .dropdown-menu .search-control').click(function(e) {
+                e.stopPropagation();
+            });
+        </script>
+    </section>
+
+    <footer ng-cloak ng-if="!fotrHide" >
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12">
+                    <p>All Content &copy; 2015 PureSpectrum&reg; Marketplace Inc. All Rights Reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- loader -->
+    <div class="overlay-div" ng-if="loader.show">
+        <div id="loader-wrapper">
+            <div id="loader"><span></span></div>
+        </div>
+    </div>
+</div>
+<style>
+    .add-option-btn{
+        cursor: pointer;
+        max-width: 50px;
+        text-align: center;
+        padding: 0;
+        width: 100%;
+        height: 31px;
+        margin-top: 0;
+        vertical-align: 5px;
+    }
+    .add-option-btn:before{
+        vertical-align: -5px;
+    }
+</style>
+

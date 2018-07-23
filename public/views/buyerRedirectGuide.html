@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<title>Buyer Redirect Guide</title>
+	<style type="text/css">
+		/*#page_1 #p1dimg1 {position:absolute;top:0px;left:2px;z-index:-1;width:624px;height:700px;}*/
+		
+		.img-center {
+			display: block;
+			margin: auto;
+			width: 350px;
+			margin-bottom: 20px
+		}
+		.page{
+			margin: 0 auto 100px;
+		}
+		.title {
+			text-align: center;
+			margin-top: 30px
+		}
+		
+		.bold {
+			font-weight: bold !important;
+		}
+		
+		.ft {
+			font: 14px 'Arial';
+			color: #ff0000;
+			line-height: 18px;
+		}
+		
+		.ft0 {
+			font: 14px 'Arial';
+			color: #333333;
+			line-height: 18px;
+		}
+		
+		.ft9 {
+			font: 14px 'Arial';
+			text-decoration: underline;
+			color: #0000ff;
+			line-height: 16px;
+		}
+		
+		.ft22 {
+			font: 14px 'Arial';
+			text-decoration: underline;
+			color: #1155cc;
+			line-height: 19px;
+		}
+		
+		.td0 {
+			border-left: #000000 1px solid;
+			border-right: #000000 1px solid;
+			border-top: #000000 1px solid;
+			border-bottom: #000000 1px solid;
+			padding: 6px;
+			margin: 0px;
+			width: 113px;
+			vertical-align: bottom;
+		}
+		
+		.td1 {
+			border-right: #000000 1px solid;
+			border-top: #000000 1px solid;
+			border-bottom: #000000 1px solid;
+			padding: 6px;
+			margin: 0px;
+			width: 59px;
+			vertical-align: bottom;
+		}
+		
+		.td2 {
+			border-left: #000000 1px solid;
+			border-right: #000000 1px solid;
+			border-bottom: #000000 1px solid;
+			padding: 6px;
+			margin: 0px;
+			width: 113px;
+			vertical-align: bottom;
+		}
+		
+		.td3 {
+			border-right: #000000 1px solid;
+			border-bottom: #000000 1px solid;
+			padding: 6px;
+			margin: 0px;
+			width: 59px;
+			vertical-align: bottom;
+		}
+		
+		.td4 {
+			border-left: #000000 1px solid;
+			border-right: #000000 1px solid;
+			border-top: #000000 1px solid;
+			border-bottom: #000000 1px solid;
+			padding: 6px;
+			margin: 0px;
+			width: 107px;
+			vertical-align: bottom;
+		}
+		
+		.td5 {
+			border-right: #000000 1px solid;
+			border-top: #000000 1px solid;
+			border-bottom: #000000 1px solid;
+			padding: 6px;
+			margin: 0px;
+			width: 529px;
+			vertical-align: bottom;
+		}
+		
+		.td6 {
+			border-left: #000000 1px solid;
+			border-right: #000000 1px solid;
+			border-bottom: #000000 1px solid;
+			padding: 6px;
+			margin: 0px;
+			width: 107px;
+			vertical-align: bottom;
+		}
+		
+		.td7 {
+			border-right: #000000 1px solid;
+			border-bottom: #000000 1px solid;
+			padding: 6px;
+			margin: 0px;
+			width: 529px;
+			vertical-align: bottom;
+		}
+		
+		.tr0 {
+			height: 23px;
+		}
+		
+		.tr1 {
+			height: 17px;
+		}
+		
+		.tr2 {
+			height: 19px;
+		}
+		
+		.tr3 {
+			height: 21px;
+		}
+		
+		.tr4 {
+			height: 24px;
+		}
+		
+		.t0 {
+			max-width: 174px;
+			width:100%;
+			margin:20px auto;
+			font: 14px 'Arial';
+		}
+		
+		.t1 {
+			max-width: 800px;
+			width:100%;
+			margin:20px auto;
+			font: 12px 'Arial';
+			color: #3572b0;
+		}
+		
+		.t2 {
+			max-width: 800px;
+			width:100%;
+			margin:20px auto;
+			font: 12px 'Arial';
+			color: #3572b0;
+		}
+		p.bold.ft0 {
+		    margin-top: 24px;
+		    font-size: 16px;
+		}
+		code {
+		    color: #337AED;
+		    background: #eee;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<section class="pad">
+			<div class="page">
+				<div id="p1dimg1">
+					<img class="img-center" src="img/logo.png" alt="">
+				</div>
+				<div class="dclr"></div>
+				<h4 class="bold title">Buyer Redirect Guide 12/11/2017</h4>
+				<p class="bold ft0">Overview:</p>
+				<p class="ft0">For PureSpectrum to properly record respondent actions, we append a​ <span class="ft">[transaction_id]</span> in the Redirect
+					URL. When returning the respondent back to PureSpectrum, we need both the <span class="ft">[transaction_id]​</span> &amp;
+					appropriate status ​<span class="ft">[st]​</span>.</span>
+				</p>
+				<p class="bold ft0">Definitions:</p>
+				<p class="ft0"><span class="ft">[transaction_id] ​</span>is the unique, Per Session Transaction ID.</p>
+				<p class="ft0"><span class="ft">[st] ​</span>is the status code for Complete, Term, Overquota, or other redirects.</p>
+				<p class="bold ft0">Setting up a Live Survey:</p>
+				<p class="ft0">When setting up a new survey, enter your survey entry link in the “Live URL” field in the box as pictured below.</p>
+				<img src="img/finalSetup.png" alt="">
+				<p class="ft0">We will take your entry URL, and append “&amp;transaction_id=​<span class="ft">[transaction_id]​</span>”.</p>
+
+				<p class="ft"><span class="ft0">For example </span><span class="ft"><code>http://yoursurvey.com/survey1</code></span><span class="ft0"> will become</span></p>
+				<p class="ft"><span class="ft"><code>http://yoursurvey.com/survey1?transaction_id=123456</code></span>
+					<span
+						class="ft0">.</span>​</p>
+				<p class="ft0">If you need to receive transaction_id in a different form, you can map this variable to yours in the menu option for “Buyer
+					Settings”. Just open the menu, and change the value in “Transaction ID” to your desired keyname.</p>
+				<p class="ft0">If you run multiple surveys in different platforms, you may check the boxes for additional transaction variables, just
+					ensure that the presence of unknown variables is compatible with all active systems.</p>
+			</div>
+			<div class="page">
+				<div id="p2dimg1">
+					<img class="img-center" src="img/logo.png" alt="">
+					<img src="img/buyerSetting.jpg" alt="" width="100%">
+				</div>
+				<div class="dclr"></div>
+				<p class="bold ft0">Setting up a Test URL:</p>
+				<p class="ft0">The Test URL is used in preparing the “Test Link” that is available to both you &amp; the suppliers that you have chosen. If
+					you have a variation of your live URL that is used for testing, you can use that link here. If no “Test URL” is present,
+					the “Live URL” will be used to prepare the “Test Link”. Additionally, the “Test Link” adds security bypass variables to
+					allow for testing.</p>
+				<p class="bold ft0">Redirecting back to PureSpectrum:</p>
+				<p class="p15 ft0">After the respondent is finished taking the survey, you must redirect them back to us, including the ​
+					<SPAN class="ft">[transaction_id]​</SPAN>
+					<SPAN class="">​</SPAN> &amp; appropriate status​
+					<SPAN class="">​</SPAN>
+					<SPAN class="ft"> [st].</SPAN>
+				</p>
+				<p class="p16 bold ft0 text-center">Redirect Codes are as follows:</p>
+				<table cellpadding=0 cellspacing=0 class="t0">
+					<tr>
+						<td class="tr0 td0">
+							<p class="p17 bold">Status</p>
+						</td>
+						<td class="tr0 td1">
+							<p class="p18 bold">Code</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="tr1 td2">
+							<p class="p17">Complete</p>
+						</td>
+						<td class="tr1 td3">
+							<p class="p19 ft">21</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="tr1 td2">
+							<p class="p17">Termination</p>
+						</td>
+						<td class="tr1 td3">
+							<p class="p19 ft">18</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="tr2 td2">
+							<p class="p17">Over Quota</p>
+						</td>
+						<td class="tr2 td3">
+							<p class="p19 ft">17</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="tr2 td2">
+							<p class="p17">Dedupe</p>
+						</td>
+						<td class="tr2 td3">
+							<p class="p19 ft">20</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="tr2 td2">
+							<p class="p17 ">Quality</p>
+						</td>
+						<td class="tr2 td3">
+							<p class="p19 ft">30</p>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div class="page">
+				<div id="p3dimg1">
+					<img class="img-center" src="img/logo.png" alt="">
+				</div>
+
+
+				<div class="dclr"></div>
+				<p class="bold ft0 text-center">In Summary, Returned URLs should follow:</p>
+				<table cellpadding=0 cellspacing=0 class="t1">
+					<tr>
+						<td class="tr3 td4">
+							<p class="p17 bold">If Status is:</p>
+						</td>
+						<td class="tr3 td5">
+							<p class="p21 bold">URL Is:</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="tr4 td6">
+							<p class="p17 bold">Completes</p>
+						</td>
+						<td class="tr4 td7">
+							<p class="p21 ">
+								<code>https://spectrumsurveys.com/surveydone?st=<span class="ft">21</span>&transaction_id=​<span class="ft">[transaction_id]</span></code>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="tr4 td6">
+							<p class="p17 bold">Over Quota</p>
+						</td>
+						<td class="tr4 td7">
+							<p class="p21 ">
+								<code>https://spectrumsurveys.com/surveydone?st=<span class="ft">17</span>&transaction_id=​<span class="ft">[transaction_id]</span></code>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="tr4 td6">
+							<p class="p17 bold">Termination</p>
+						</td>
+						<td class="tr4 td7">
+							<p class="p21 ">
+								<code>https://spectrumsurveys.com/surveydone?st=<span class="ft">18</span>&transaction_id=​<span class="ft">[transaction_id]</span></code>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="tr4 td6">
+							<p class="p17 bold">Dedupe</p>
+						</td>
+						<td class="tr4 td7">
+							<p class="p21 ">
+								<code>https://spectrumsurveys.com/surveydone?st=<span class="ft">20</span>&transaction_id=​<span class="ft">[transaction_id]</span></code>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="tr4 td6">
+							<p class="p17 bold">Quality</p>
+						</td>
+						<td class="tr4 td7">
+							<p class="p21 ">
+								<code>https://spectrumsurveys.com/surveydone?st=<span class="ft">30</span>&transaction_id=​<span class="ft">[transaction_id]</span></code>
+							</p>
+						</td>
+					</tr>
+				</table>
+				<p class="bold ft0 text-center">If using the Qualtrics platform, Returned URLS should be implemented as follows:</p>
+				<table cellpadding=0 cellspacing=0 class="t2">
+					<tr>
+						<td class="tr3 td4">
+							<p class="p17 bold">If Status is:</p>
+						</td>
+						<td class="tr3 td5">
+							<p class="p21 bold">URL Is:</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="tr4 td6">
+							<p class="p17 bold">Completes</p>
+						</td>
+						<td class="tr4 td7">
+							<p class="p21 ">
+								<code>https://spectrumsurveys.com/surveydone?st=<span class="ft">21</span>&transaction_id=​<span class="ft">${e://Field/transaction_id}</span></code>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="tr4 td6">
+							<p class="p17 bold">Over Quota</p>
+						</td>
+						<td class="tr4 td7">
+							<p class="p21 ">
+								<code>https://spectrumsurveys.com/surveydone?st=<span class="ft">17</span>&transaction_id=​<span class="ft">${e://Field/transaction_id}</span></code>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="tr4 td6">
+							<p class="p17 bold">Termination</p>
+						</td>
+						<td class="tr4 td7">
+							<p class="p21 ">
+								<code>https://spectrumsurveys.com/surveydone?st=</a><span class="ft">18</span>&transaction_id=​<span class="ft">${e://Field/transaction_id}</span></code>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="tr4 td6">
+							<p class="p17 bold">Dedupe</p>
+						</td>
+						<td class="tr4 td7">
+							<p class="p21 ">
+								<code>https://spectrumsurveys.com/surveydone?st=</a><span class="ft">20</span>&transaction_id=​<span class="ft">${e://Field/transaction_id}</span></code>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<td class="tr4 td6">
+							<p class="p17 bold">Quality</p>
+						</td>
+						<td class="tr4 td7">
+							<p class="p21 ">
+								<code>https://spectrumsurveys.com/surveydone?st=</a><span class="ft">30</span>&transaction_id=​<span class="ft">${e://Field/transaction_id}</span></code>
+							</p>
+						</td>
+					</tr>
+				</table>
+				<p class="bold ft0">URL Hashing:</p>
+				<p class="ft0">PureSpectrum strongly encourages the use of URL hashing as a means of fraud prevention. A hash generated using a shared,
+					secret token is the front line of defense against link manipulation.</p>
+				<p class="ft0">To generate the hash, open the menu for hashing in your Buyer Settings, and input your shared secret. By enabling Sha1
+					hashing from this menu, <b>any</b>​ completed transaction with st=21 with</p>
+				<p><span class="ft0">an incorrect </span><span class="ft0">ps</span><span class="ft0">​ </span><span class="ft0">_hash​</span>			value will be redirected back to the supplier as a fraudulent attempt.</p>
+				<p class="ft0">The formula we use to generate <span class="ft0">ps</span>​ <span class="ft0">_hash ​</span>is sha1(​<span class="ft0">full_url​</span>+​
+					<span
+						class="ft0">shared_secret​</span>) where full_url is the value of the entire url as you are redirecting the respondent, less the ps_hash
+						variable.</p>
+				<p class="ft0">E.g.</p>
+				<p class="ft0">sharedsecret = C3F7da7kney9</p>
+				<p class="ft0">full URL = <code>https://spectrumsurveys​.com/surveydone?st=21&amp;transaction_id=abc123</code> ps_hash
+					(according to
+					<nobr><a href="http://www.sha1-online.com/" target="_blank">http://www​.sha1-online.com​)</a></nobr>= <code>948109ecbb0084e0d1e9797bd4e49d78fd44746</code></p>
+				<p class="ft0">Full respondent redirect =</p>
+				<p class="ft22"><code>https://spectrumsurveys.com/surveydone?st=21&transaction_id=abc123&ps_hash=948109ecbb 0084e0d1e9797bd4e49d78fd44746</code></p>
+			</div>
+			<div class="page">
+				<div id="p4dimg1">
+					<img class="img-center" src="img/logo.png" alt="">
+				</div>
+				<div class="dclr"></div>
+				<p class="bold ft0">Sample Hashing Script:</p>
+				<p class="ft0">var pid = f("pid");</p>
+				<p class="ft0">var st = "21"; // change based on status var buyer_shared_private_key = "xxxxxx"</p>
+				<p class="ft0">var urlToHash = <code>"​https://spectrumsurveys.com/surveydone?transaction_</code>id=​"+pid+"&st="+st
+					var verificationBytes = System.Text.Encoding.UTF8.GetBytes(urlToHash+buyer_shared_private_key);</p>
+				<p class="ft0">var SHA1 = new System.Security.Cryptography.SHA1CryptoServiceProvider(); var verificationHashBytes = SHA1.ComputeHash(verificationBytes);</p>
+				<p class="ft0">var delimitedHexHash = BitConverter.ToString(verificationHashBytes); var verificationHexHash =
+					<nobr>delimitedHexHash.Replace("-",</nobr> "");</p>
+				<p class="ft0">var hash = verificationHexHash.toLowerCase();</p>
+				<p class="ft0">f("hash1").set(hash)</p>
+				<p class="ft0">var url = urlToHash+”&amp;ps_hash="+hash;</p>
+			</div>
+		</section>
+	</div>
+</body>
+
+</html>

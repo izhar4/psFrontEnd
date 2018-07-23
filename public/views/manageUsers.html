@@ -1,0 +1,191 @@
+<div ng-controller="manageUserCtrl">    
+    <header class="dashbboard-header">
+        <div class="col-xs-12 col-sm-6 col-md-6 dash-logo-section">
+            <img class="img-responsive" src="img/logo-without-name.png" alt="Logo" title="" ui-sref="home" />
+            <!--<div class="dashbdr-search">
+                <input type="text" required=""  name="" class="form-control" style="" placeholder="Search">
+            </div>-->
+            <p><a href="tel:+877865-PURE">(877) 865-PURE</a></p>
+        </div>
+        <div class="col-xs-12 col-sm-4 col-md-4 dashbrd-options pull-right text-right">
+            <a ng-if="showCreate" ui-sref="dynstate({id: 'CreateSurveys' })">+ New Survey</a>
+            <div class="dropdown user-options">
+                <button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <img class="img-responsive" src="img/dashbrd-header-menu.png" alt="menu" title="" />
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="user-actions">
+                    <li class="username">Hello {{userEmail}}</li>
+                    <!-- <li class="access-levels">
+                        <div class="col-xs-6">
+                            <p>Platform capabilities:</p>
+                            <span>Buyer = {{buyer}}</span>
+                            <span>Supplier = {{supplier}}</span>
+                            <span>Operator = {{operator}}</span>
+                        </div>
+                        <div class="col-xs-6">
+                            <p>Access Levels:</p>
+                            <span>Buyerside = {{buyerrole}}</span>
+                            <span>Supplierside = {{supplierrole}}</span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </li> -->
+                    <li ng-repeat="link in dsboardLink"> <button type="button" class="btn btn-link" ui-sref="dynstate({id: {{'link.featureKey'}} })" >{{link.featureLabel}}</button></li>
+                    <li><a ng-click="resetPassword()">Reset Password</a></li>
+                    <li><a ng-click="logout()">Logout</a></li>
+                 </ul>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </header>
+    <section class="pad">
+        <div class="container" style="margin-top: 100px">
+            <div class="row">
+                <div class="col-xs-12 col-sm-5 col-md-5">
+                    <form class="form-horizontal">
+                        <button type="button" class="btn btn-primary pull-left submit-btn" style="margin-left: 20px;" ui-sref="home">Back to Dashboard</button>
+                            <button type="button" class="btn btn-primary submit-btn pull-right" ng-click="clearUserDetail(userDetails)">New User</button>
+                            <legend style="padding-top: 50px">User Listing</legend>
+                            <div class="panel panel-default">
+                                <div class="panel-body" style="height: 200px;overflow-y: auto;">
+                                    <div class="row">
+                                        <div class="col-xs-12" ng-repeat="user in users" style="padding:1.5px 0px;">
+                                            <div class="col-xs-8">
+                                                <a class="cursor-pointer2" href="" ng-click="openUserDetails(user)">{{user.name}} </a>
+                                            </div>
+                                            <div class="col-xs-4 text-right">
+                                                <a  ng-if="user.status != 'Active'" data-toggle="modal" data-target="#status-change-modal"  ng-click="openUserStatusModal(user.id,user.name,  'Active')" class="cursor-pointer2">Activate</a>
+                                                <a ng-if="user.status == 'Active'" data-toggle="modal" data-target="#status-change-modal"  ng-click="openUserStatusModal(user.id,user.name, 'Inactive')" class="cursor-pointer2">Deactivate</a>
+                                            </div>
+                                            <div class="clearfix"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!--<ul class="pull-left">
+                                        <li ng-repeat="user in users" class="cursor-pointer2"><a href="" ng-click="openUserDetails(user)">{{user.name}} </a>
+                                        </li>
+                                     </ul>
+                                      <ul class="pull-left">
+                                        <li ng-repeat="user in users" class="cursor-pointer2">
+                                            <a  ng-if="user.status != 'Active'" data-toggle="modal" data-target="#status-change-modal"  ng-click="openUserStatusModal(user.id,user.name,  'Active')">Activate</a>
+                                            <a ng-if="user.status == 'Active'"data-toggle="modal" data-target="#status-change-modal"  ng-click="openUserStatusModal(user.id,user.name, 'Inactive')">Deactivate</a>
+                                        </li>
+                                     </ul>-->
+                                </div>
+                            </div>
+                    </form>
+                </div>
+                <div class="col-xs-12 col-sm-6 col-md-6 pull-right">
+                    <form class="form-horizontal">
+                            <div class="panel panel-default">
+                                <div class="panel-body ">
+                                   <form class="form-horizontal">
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">User Id</label>
+                                            <div class="col-sm-6">
+                                                    <input name="userDetails.email"  type="text" placeholder="User Id" class="form-control input-md" 
+                                                    ng-model="userDetails.email"
+                                                    ng-disabled="isCompanyDisabled"
+                                                    
+                                                    >
+                                                   
+    
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Name</label>
+                                            <div class="col-sm-6">
+                                                <input name="userDetails.name" type="text" placeholder="Name" class="form-control input-md" ng-model="userDetails.name">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Company</label>
+                                            <div class="col-sm-6">
+                                                <select name="userDetails.company" id="ucompany" class="form-control" ng-change="updateLevelDropdown(userDetails.company);" ng-options="company.id as company.name for company in companies" ng-model="userDetails.company" ng-disabled="isCompanyDisabled">
+                                                    <option value="">-- Select company --</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Password</label>
+                                            <div class="col-sm-6">
+                                                <input name="userDetails.password" id="password" type="password" placeholder="Password" class="form-control input-md" ng-model="userDetails.password">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Buyer Side Access Levels</label>
+                                            <div class="col-sm-6">
+                                                <select  name="userDetails.buyerSideAccessLevels" class="form-control" id="buyerAcssLvls" ng-model="userDetails.buyerSideAccessLevels" ng-disabled="isBuyerDisabled">
+                                                    <option value="">-- Select buyer access level --</option>
+                                                    <option ng-selected="userDetails.buyerSideAccessLevels == 'none'" value="none">None</option>
+                                                    <option ng-selected="userDetails.buyerSideAccessLevels == 'limited'" value="limited">Limited</option>
+                                                    <option ng-selected="userDetails.buyerSideAccessLevels == 'full'" value="full">Full</option>
+                                                    <option ng-selected="userDetails.buyerSideAccessLevels == 'admin'" value="admin">Admin</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Seller  Side Access Levels</label>
+                                            <div class="col-sm-6">
+                                                <select name="userDetails.supplierSideAccessLevels" class="form-control" id="supplierAcssLvls" ng-model="userDetails.supplierSideAccessLevels" ng-disabled="isSupplierDisabled">
+                                                    <option value="">-- Select supplier access level --</option>
+                                                    <option ng-selected="userDetails.supplierSideAccessLevels == 'none'" value="none">None</option>
+                                                    <option ng-selected="userDetails.supplierSideAccessLevels == 'limited'" value="limited">Limited</option>
+                                                    <option ng-selected="userDetails.supplierSideAccessLevels == 'full'" value="full">Full</option>
+                                                    <option ng-selected="userDetails.supplierSideAccessLevels == 'admin'" value="admin">Admin</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label"> Operator Side Access Levels</label>
+                                            <div class="col-sm-6">
+                                                <select name="userDetails.operatorAccessLevels" class="form-control" id="operatorAcssLvls" ng-model="userDetails.operatorAccessLevels" ng-disabled="isOperatorDisabled"
+                                                     >
+                                                    <option value="">-- Select operator access level --</option>
+                                                    <option ng-selected="userDetails.operatorAccessLevels == 'none'" value="none">None</option>
+                                                    <option ng-selected="userDetails.operatorAccessLevels == 'limited'" value="limited">Limited</option>
+                                                    <option ng-selected="userDetails.operatorAccessLevels == 'full'" value="full">Full</option>
+                                                    <option ng-selected="userDetails.operatorAccessLevels == 'admin'" value="admin">Admin</option>
+                                                </select>
+                                               </div>
+                                            </div>
+                                            <div class="col-xm-6 col-md-12 col-sm-12 pull-right">
+                                                <div class="btn-group-md">
+                                                    <button type="button" class="btn btn-warning  btnSpace " class="status-change-no"  ng-click="clearUserDetail(userDetails)" data-dismiss="modal">Cancel</button>
+                                                    <button type="button" class="btn btn-success btnSpace " ng-click="saveUserDetails(userDetails)">Save</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                </div>
+                            </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!------------------Modal For User Status------------------>
+    <div id="status-change-modal" class="modal" tabindex="-1" role="dialog"  >
+        <div class="vertical-alignment-helper">
+            <div class="modal-dialog vertical-align-center">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title text-center">Save as {{toUpdate.status}} or close</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-center">Save User {{toUpdate.name}} as {{toUpdate.status}}?</p>
+                        <div class="text-center">
+                            <a class="status-change-yes" ng-click="updateUserStatus()">Save as {{toUpdate.status}} and Close</a>
+                            <a class="status-change-no" data-dismiss="modal">No thanks, close</a>
+                        </div>
+                        <div class="survey-state-success">
+                            <p><span ng-if="showSuccessMessage">Success!</span> {{statusUpdateMsg}}</p>
+                        </div>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div>
+        </div>
+    </div><!-- /.modal -->
+</div>

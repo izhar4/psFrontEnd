@@ -1,0 +1,426 @@
+<div ng-controller="suppSettingCtrl">
+    <header class="dashbboard-header">
+        <div class="col-xs-12 col-sm-6 col-md-6 dash-logo-section">
+            <img class="img-responsive" src="img/logo-without-name.png" alt="Logo" title="" ui-sref="home"  />
+            <p><a href="tel:+877865-PURE">(877) 865-PURE</a></p>
+        </div>
+        <div class="col-xs-12 col-sm-4 col-md-4 dashbrd-options pull-right text-right">
+            <a ng-if="showCreate" ui-sref="dynstate({id: 'CreateSurveys' })">+ New Survey</a>
+            <div class="dropdown user-options">
+                <button class="btn btn-default dropdown-toggle survey-style" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <img class="img-responsive" src="img/dashbrd-header-menu.png" alt="menu" title="" />
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="user-actions">
+                    <li class="username">Hello {{userEmail}}</li>
+                    <!-- <li class="access-levels">
+                        <div class="col-xs-6">
+                            <p>Platform capabilities:</p>
+                            <span>Buyer = {{buyer}}</span>
+                            <span>Supplier = {{supplier}}</span>
+                            <span>Operator = {{operator}}</span>
+                        </div>
+                        <div class="col-xs-6">
+                            <p>Access Levels:</p>
+                            <span>Buyerside = {{buyerrole}}</span>
+                            <span>Supplierside = {{supplierrole}}</span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </li> -->
+                    <li ng-repeat="link in dsboardLink"> <button type="button" class="btn btn-link" ui-sref="dynstate({id: {{'link.featureKey'}} })" >{{link.featureLabel}}</button></li>
+                    <li><a ng-click="resetPassword()">Reset Password</a></li>
+                    <li><a ng-click="logout()">Logout</a></li>
+                 </ul>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </header>
+    <div class="container">
+        <section class="pad manageSupplierSetting">
+            <div class="col-xs-12 col-sm-12 col-md-10 col-md-offset-1 survey">
+                <h4>Supplier Setting</h4>
+            </div>
+            <div class="col-md-12 dashbrd-survey-table table-responsive">
+                <div class="survey-detail-tabs" >
+                    <ul class="nav nav-tabs custom-tabs" role="tablist">
+                        <li ng-class="{ active: isSet(1) }">
+                            <a href ng-click="setTab(1)">Exclusion Settings</a>
+                        </li>
+                        <li ng-class="{ active: isSet(2) }">
+                            <a href ng-click="setTab(2)">Redirect URL</a>
+                        </li>
+                        <li ng-class="{ active: isSet(3) }">
+                            <a href ng-click="setTab(3)">Variable Mapping</a>
+                        </li>
+                        <li ng-class="{ active: isSet(4) }">
+                            <a href ng-click="setTab(4)">Notification Status</a>
+                        </li>
+                        <li ng-class="{ active: isSet(5) }">
+                            <a href ng-click="setTab(5)">Hashing</a>
+                        </li>
+                        <li ng-class="{ active: isSet(6) }">
+                            <a href ng-click="setTab(6)">Augment Survey</a>
+                        </li>
+                    </ul>
+                </div>     
+                <form class="form-horizontal">
+                    <div class="">
+                        <div ng-show="isSet(1)" class="supplier-tabs">
+                            <div class="col-md-4">
+                                <p class="pull-right" ng-show="hasGndrFlag">Has Quotas</p>
+                                <label>Country</label>
+                                <div class="dropdown" ng-init="countryOpen = false">
+                                    <div class="multiselect-parent btn-group dropdown-multiselect">
+                                        <span>
+                                            <button type="button" class="dropdown-toggle btn btn-default" ng-class="settings.buttonClasses" ng-click="countryOpen = !countryOpen; geographyOpen = false">Country&nbsp;
+                                                <span></span>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-form" ng-style="{display: countryOpen ? 'block' : 'none'}">
+                                                <li role="presentation" ng-repeat="lang in exlang">
+                                                    <a role="menuitem" tabindex="-1" ng-click="excludeLanguage(lang)">
+                                                        <div class="checkbox">
+                                                            <input class="checkboxInput" type="checkbox" value="{{lang}}" ng-click="excludeLanguage(lang)" />
+                                                            <label>{{lang}}</label>
+                                                        </div>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="pull-right" ng-show="hasGndrFlag">Has Quotas</p>
+                                <label>Geography Exclusions</label>
+                                <div class="dropdown" ng-init="geographyOpen = false">
+                                    <div class="multiselect-parent btn-group dropdown-multiselect">
+                                        <span>
+                                            <button type="button" class="dropdown-toggle btn btn-default" ng-click="geographyOpen = !geographyOpen; countryOpen = false">Geography&nbsp;
+                                                <span></span>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-form" ng-style="{display: geographyOpen ? 'block' : 'none'}">
+                                                <li role="presentation" ng-repeat="geo in geoExclusion">
+                                                    <a role="menuitem" tabindex="-1">
+                                                        <div class="checkbox">
+                                                            <input class="checkboxInput" type="checkbox" ng-click="excludeLocation()" />
+                                                            <label>{{geo}}</label>
+                                                        </div>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label col-xs-4">Max LOI </label>
+                                    <div class="col-xs-6">
+                                        <input type="number" onkeypress='return validateQty(event, this);'  class="form-control" placeholder="Max LOI" ng-model="suppSetObj.max_loi">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-xs-4">Min Incidence</label>
+                                    <div class="col-xs-6">
+                                        <input type="number" onkeypress='return validateQty(event, this);' class="form-control"  placeholder="Min Incidence" ng-model="suppSetObj.min_incidence">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-xs-4" >Recontact</label>
+                                    <div class="col-md-6">
+                                        <label class="radio-inline">
+                                            <input type="radio" name="rdo2" value= 1 ng-model="suppSetObj.isRecontact" >
+                                            Yes
+                                        </label>
+                                        <label class="radio-inline" >
+                                            <input type="radio" name="rdo2"   value= 0 ng-model="suppSetObj.isRecontact" >
+                                            No
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-xs-4" >Postal Code Wild Cards</label>
+                                    <div class="col-md-6">
+                                        <label class="radio-inline">
+                                            <input type="radio" name="rdo5" value= 1 ng-model="suppSetObj.isPostalCode" >
+                                            Yes
+                                        </label>
+                                        <label class="radio-inline" >
+                                            <input type="radio" name="rdo5" value= 0 ng-model="suppSetObj.isPostalCode" >
+                                            No
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div ng-show="isSet(2)" class="supplier-tabs">
+                            <div class="form-group" >
+                                <label class="col-md-4 control-label" >Supplier Url For Completes: </label>
+                                <div class="col-md-6">
+                                    <input  name="textinput" type="text" placeholder="Supplier Url For Completes " class="form-control input-md" ng-model="suppSetObj.supp_url_completes">
+
+                                </div>
+                            </div>
+
+                            <div class="form-group" >
+                                <label class="col-md-4 control-label" >Supplier Url For Terms: </label>
+                                <div class="col-md-6">
+                                    <input  name="textinput" type="text" placeholder="Supplier Url For Terms " class="form-control input-md" ng-model="suppSetObj.supp_url_terms">
+                                </div>
+                            </div>
+                            <div class="form-group" >
+                                <label class="col-md-4 control-label" >Supplier Url For OverQuotas: </label>
+                                <div class="col-md-6">
+                                    <input  name="textinput" type="text" placeholder="Supplier Url For OverQuotas " class="form-control input-md" ng-model="suppSetObj.supp_url_overquota">
+                                </div>
+                            </div>
+                            <div class="form-group" >
+                                <label class="col-md-4 control-label" >Supplier Url For Security Termination: </label>
+                                <div class="col-md-6">
+                                    <input  name="textinput" type="text" placeholder="Supplier Url For Security Termination " class="form-control input-md" ng-model="suppSetObj.supp_url_security_terms">
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-show="isSet(3)" class="supplier-tabs">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Incoming</th>
+                                        <th>Outgoing</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><label>Unique Session ID</label></td>
+                                        <td><input  name="textinput" ng-init="uniquesessionid_in.defaultval='ps_supplier_sid'" type="text" placeholder="ps_supplier_sid " class="form-control input-md" ng-model="uniquesessionid_in.defaultval" onKeyPress="return ValidateAlpha(event);" maxlength="36"></td>
+                                        <td><input  name="textinput" type="text" placeholder="ps_supplier_sid " class="form-control input-md" ng-model="uniquesessionid_out.defaultval" ng-init="uniquesessionid_out.defaultval= 'ps_supplier_sid'" onKeyPress="return ValidateAlpha(event);" maxlength="36"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label>Unique Member / Panelist ID</label></td>
+                                        <td><input  name="textinput" type="text" ng-init="uniquemember_in.defaultval='ps_supplier_respondent_id'" placeholder="ps_supplier_respondent_id " class="form-control input-md" ng-model="uniquemember_in.defaultval" onKeyPress="return ValidateAlpha(event);" maxlength="36"></td>
+                                        <td><input  name="textinput" type="text" placeholder="ps_supplier_respondent_id " class="form-control input-md" ng-model="uniquemember_out.defaultval" ng-init="uniquemember_out.defaultval='ps_supplier_respondent_id'" onKeyPress="return ValidateAlpha(event);" maxlength="36"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label>Custom Variable1</label></td>
+                                        <td><input  name="textinput" type="text" placeholder="ps_custom_svar1 " class="form-control input-md" ng-model="customevar1_in.defaultval" ng-init="customevar1_in.defaultval='ps_custom_svar1'" onKeyPress="return ValidateAlpha(event);" maxlength="36"></td>
+                                        <td><input  name="textinput" type="text" placeholder="ps_custom_svar1  " class="form-control input-md" ng-model="customevar1_out.defaultval" ng-init="customevar1_out.defaultval='ps_custom_svar1'" onKeyPress="return ValidateAlpha(event);" maxlength="36"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label>Custom Variable2</label></td>
+                                        <td><input  name="textinput" type="text" placeholder="ps_custom_svar2 " class="form-control input-md" ng-model="customevar2_in.defaultval" ng-init="customevar2_in.defaultval='ps_custom_svar2'" onKeyPress="return ValidateAlpha(event);" maxlength="36"></td>
+                                        <td><input  name="textinput" type="text" placeholder="ps_custom_svar2  " class="form-control input-md" ng-model="customevar2_out.defaultval" ng-init="customevar2_out.defaultval='ps_custom_svar2'" onKeyPress="return ValidateAlpha(event);" maxlength="36"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label>Purespectrum Respondent ID</label></td>
+                                        <td></td>
+                                        <td><input  name="textinput" type="text" placeholder="ps_psid  " class="form-control input-md" ng-disabled="true"><span>Currently not configurable</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label>Purespectrum Respondent Status Code</label></td>
+                                        <td></td>
+                                        <td><input  name="textinput" type="text" placeholder="ps_rstatus " class="form-control input-md" ng-disabled="true"><span>Currently not configurable</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label>Purespectrum Hash Code</label></td>
+                                        <td></td>
+                                        <td><input  name="textinput" type="text" placeholder="ps_s_hash" class="form-control input-md" ng-disabled="true" maxlength="36"><span>Currently not configurable</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label>Purespectrum Quota ID for OQ</label></td>
+                                        <td></td>
+                                        <td><input  name="textinput" type="text" placeholder="ps_oqid " class="form-control input-md" ng-model="ps_oqid.defaultval" onKeyPress="return ValidateAlpha(event);" maxlength="36"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div ng-show="isSet(4)" class="supplier-tabs">
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" > Send Notification</label>
+                                <div class="col-md-6">
+                                    <label class="radio-inline">
+                                        <input type="radio" name="rdo1" id="notify" value=1 ng-model="suppSetObj.isNotify" >
+                                        Yes
+                                    </label>
+                                    <label class="radio-inline" >
+                                        <input type="radio" name="rdo1"   value=0 ng-model="suppSetObj.isNotify" >
+                                        No
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-show="isSet(5)" class="supplier-tabs">
+                            <div class="form-group">
+                            <label class="col-md-4 control-label" > Enable SHA1 Hashing</label>
+                            <div class="col-md-6">
+                                    <label class="radio-inline">
+                                        <input type="radio" name="rdo1" id="hashing" value = 1 ng-model="suppSetObj.isHashing" >
+                                        Yes
+                                    </label>
+                                    <label class="radio-inline" >
+                                        <input type="radio" name="rdo1"  value = 0 ng-model="suppSetObj.isHashing" >
+                                        No
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Shared Private Key</label>
+                                <div class="col-xs-6">
+                                    <input name="private_key" type="text" placeholder="Private Key for Hash" class="form-control input-md" ng-model="suppSetObj.private_key">
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-show="isSet(6)" class="supplier-tabs text-center">
+                            <div class="form-inline">
+                                <div class="form-group">
+                                    <label class="col-md-6 control-label" >Complete Request </label>
+                                    <div class="col-md-6">
+                                        <label class="radio-inline">
+                                            <input type="radio" name="cmp_radio" value = 1 ng-model="compReqObj.enable" >
+                                            Yes
+                                        </label>
+                                        <label class="radio-inline" >
+                                            <input type="radio" name="cmp_radio"  value = 0 ng-model="compReqObj.enable" >
+                                            No
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-xs-6">URI</label>
+                                    <div class="col-xs-6">
+                                        <input name="comp_req_uri" type="text" class="form-control input-md" ng-model="compReqObj.url" ng-disabled="compReqObj.enable == 0">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-inline">
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" >Session Id Request</label>
+                                    <div class="col-md-6">
+                                        <label class="radio-inline">
+                                            <input type="radio" name="sess_radio" value = 1 ng-model="sessReqObj.enable" >
+                                            Yes
+                                        </label>
+                                        <label class="radio-inline" >
+                                            <input type="radio" name="sess_radio" value = 0 ng-model="sessReqObj.enable" >
+                                            No
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-xs-4">URI</label>
+                                    <div class="col-xs-6">
+                                        <input name="sess_req_uri" type="text" class="form-control input-md" ng-model="sessReqObj.url" ng-disabled="sessReqObj.enable == 0">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="control-label col-xs-4">Request Authentication</label>
+                                <div class="col-xs-4">
+                                    <select class="form-control" id="sess_req_type" ng-model="reqAuthObj.type" ng-options="req_type.key  as req_type.value for req_type in req_types">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group" ng-if="reqAuthObj.type == 'access_token'">
+                                <label class="control-label col-xs-4">Access Token</label>
+                                <div class="col-xs-4">
+                                    <input name="access_token" type="text" class="form-control" ng-model="reqAuthObj.value">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-md-offset-1 survey">
+                    <div class="row">
+                        <div class="btn-group inline" >
+                            <div class="col-xs-3 col-sm-4 col-md-6">
+                                <div ng-show="isSet(1)">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-click="saveSettingData()">Save</button>
+                                </div>
+                                <div ng-show="isSet(2)">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-disabled="!suppSetObj.supp_url_completes || !suppSetObj.supp_url_terms || !suppSetObj.supp_url_overquota" ng-click="saveSettingData()">Save</button>
+                                </div>
+                                <div ng-show="isSet(3)">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-click="saveSettingData()" ng-show="isSet(3)">Save</button>
+                                </div>
+                                <div ng-show="isSet(4)">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-click="saveSettingData()" ng-show="isSet(4)">Save</button>
+                                </div>
+                                <div ng-show="isSet(5)">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-disabled="((suppSetObj.isHashing == '1' || suppSetObj.isHashing == true ) && !suppSetObj.private_key)" ng-click="saveSettingData()" ng-show="isSet(5)">Save</button>
+                                </div>
+                                <div ng-show="isSet(6)">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-click="saveSettingData()" ng-show="isSet(6)">Save</button>
+                                </div>
+                            </div>
+                           <!--  <div class="col-xs-4 col-sm-4 col-md-3">
+                                <div ng-show="isSet(1)">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-disabled="!suppSetObj.max_loi || !suppSetObj.min_incidence" ng-click="cancelSupplier()">Cancel</button>
+                                </div>
+                                <div ng-show="isSet(2)">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-disabled="!suppSetObj.supp_url_completes || !suppSetObj.supp_url_terms || !suppSetObj.supp_url_overquota" ng-click="cancelSupplier()">Cancel</button>
+                                </div>
+                                <div ng-show="isSet(3)">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-click="cancelSupplier()">Cancel</button>
+                                </div>
+                                <div ng-show="isSet(4)">
+                                    <button type="button" class="btn btn-primary submit-btn" ng-click="cancelSupplier()">Cancel</button>
+                                </div>
+                            </div> -->
+                            <div class="col-xs-4 col-sm-4 col-md-4">
+                               
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="padding-top: 20px">
+                        <div class="col-xs-4 col-md-4 col-sm-4">
+                            <button type="button" class="btn btn-primary submit-btn" ui-sref="home">Back to Dashboard</button>
+                        </div>
+                    </div>
+                </div>
+                    <!--  <div class="form-group">
+                    <label class="control-label col-xs-4">Supplier return Url</label>
+                    <div class="col-xs-6">
+                        <input type="text"  class="form-control width100"  placeholder="Supplier return Url" ng-model="suppSetObj.sup_url">
+                    </div>
+                    </div> -->
+                    <!-- ----  supplier urls ------------>
+                </form>
+                
+            </div>
+        </section>
+    <br><br><br>
+</div>
+    </div>
+
+<script>
+    $( document.body ).on( 'click', '.dropdown-menu li', function( event ) {
+        var selText = $(this).text();
+        $(this).parents('.form-group').find('.dropdown-toggle').html(selText+'<span class="caret"></span>');
+    });
+    function validateQty(event, domCtrl) {
+        // accepts values up to 3 decimals
+        var value = $(domCtrl).val();
+        value = value.split('.');
+        if(value.length === 2 && value[1].length >=3) {
+            return false;
+        }
+        
+        var key = window.event ? event.keyCode : event.which;
+
+        if (event.keyCode == 8 || event.keyCode == 46
+                || event.keyCode == 37 || event.keyCode == 39 || key == 46) {
+            return true;
+        }
+        else if ( key < 48 || key > 57) {
+            return false;
+        }
+        else return true;
+    };
+
+    function ValidateAlpha(e){
+        var k;
+        document.all ? k=e.keycode : k=e.which;
+        return((k>47 && k<58)||(k>64 && k<91)||(k>96 && k<123)||k==0 ||(k==95) ||(k==8) || (k==9));
+    }
+
+</script>
